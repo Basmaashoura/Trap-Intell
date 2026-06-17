@@ -1,0 +1,425 @@
+/* =========================================
+   utilities.css — Trap-Intell Design System
+   Colors & Typography Utility Classes
+   ========================================= */
+
+/* =========================================
+   CSS Custom Properties
+   ========================================= */
+:root {
+  /* --- Brand Colors --- */
+  --clr-purple: #8a1bfa;
+  --clr-blue-purple: #4044e4;
+  --clr-green: #2ace5f;
+  --clr-dark-navy: #111326;
+  --clr-deep-blue: #3c05e7;
+  --clr-yellow: #feca2f;
+  --clr-dark-purple: #41106f;
+  --clr-gray-blue: #727c9a;
+  --clr-gold: #8d6b25;
+
+  /* --- Neutrals --- */
+  --clr-white: #ffffff;
+  --clr-light-bg: #f8f8ff;
+  --clr-light-purple: #ece7ff;
+  --clr-text-dark: #1a1a2e;
+  --clr-text-muted: #555770;
+  --clr-black: #000000;
+
+  /* --- Transparent tints (useful for backgrounds/borders) --- */
+  --clr-purple-10: rgba(138, 27, 250, 0.1);
+  --clr-purple-20: rgba(138, 27, 250, 0.2);
+  --clr-blue-purple-10: rgba(64, 68, 228, 0.1);
+  --clr-blue-purple-20: rgba(64, 68, 228, 0.2);
+  --clr-white-10: rgba(255, 255, 255, 0.1);
+  --clr-white-25: rgba(255, 255, 255, 0.25);
+  --clr-white-50: rgba(255, 255, 255, 0.5);
+  --clr-white-75: rgba(255, 255, 255, 0.75);
+
+  /* --- Typography Scale --- */
+  --font-family-base: "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-family-mono: "Courier New", Courier, monospace;
+
+  --font-size-xs: 0.75rem; /* 12px */
+  --font-size-sm: 0.875rem; /* 14px */
+  --font-size-base: 1rem; /* 16px */
+  --font-size-md: 1.125rem; /* 18px */
+  --font-size-lg: 1.25rem; /* 20px */
+  --font-size-xl: 1.5rem; /* 24px */
+  --font-size-2xl: 2rem; /* 32px */
+  --font-size-3xl: 2.5rem; /* 40px */
+  --font-size-4xl: 3rem; /* 48px */
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-extrabold: 800;
+
+  --line-height-tight: 1.2;
+  --line-height-snug: 1.4;
+  --line-height-normal: 1.6;
+  --line-height-relaxed: 1.75;
+
+  --letter-spacing-tight: -0.5px;
+  --letter-spacing-normal: 0px;
+  --letter-spacing-wide: 0.5px;
+  --letter-spacing-wider: 1px;
+}
+
+/* ===========================================
+   TEXT COLOR UTILITIES     .text-{name}
+   =========================================== */
+.text-purple {
+  color: var(--clr-purple);
+}
+.text-blue-purple {
+  color: var(--clr-blue-purple);
+}
+.text-green {
+  color: var(--clr-green);
+}
+.text-dark-navy {
+  color: var(--clr-dark-navy);
+}
+.text-deep-blue {
+  color: var(--clr-deep-blue);
+}
+.text-yellow {
+  color: var(--clr-yellow);
+}
+.text-dark-purple {
+  color: var(--clr-dark-purple);
+}
+.text-gray-blue {
+  color: var(--clr-gray-blue);
+}
+.text-gold {
+  color: var(--clr-gold);
+}
+.text-white {
+  color: var(--clr-white);
+}
+.text-dark {
+  color: var(--clr-text-dark);
+}
+.text-muted {
+  color: var(--clr-text-muted);
+}
+.text-black {
+  color: var(--clr-black);
+}
+
+/* Transparent tints */
+.text-white-50 {
+  color: var(--clr-white-50);
+}
+.text-white-75 {
+  color: var(--clr-white-75);
+}
+
+/* ===========================================
+   BACKGROUND COLOR UTILITIES   .bg-{name}
+   =========================================== */
+.bg-purple {
+  background-color: var(--clr-purple);
+}
+.bg-blue-purple {
+  background-color: var(--clr-blue-purple);
+}
+.bg-green {
+  background-color: var(--clr-green);
+}
+.bg-dark-navy {
+  background-color: var(--clr-dark-navy);
+}
+.bg-deep-blue {
+  background-color: var(--clr-deep-blue);
+}
+.bg-yellow {
+  background-color: var(--clr-yellow);
+}
+.bg-dark-purple {
+  background-color: var(--clr-dark-purple);
+}
+.bg-gray-blue {
+  background-color: var(--clr-gray-blue);
+}
+.bg-gold {
+  background-color: var(--clr-gold);
+}
+.bg-white {
+  background-color: var(--clr-white);
+}
+.bg-light {
+  background-color: var(--clr-light-bg);
+}
+.bg-light-purple {
+  background-color: var(--clr-light-purple);
+}
+.bg-dark {
+  background-color: var(--clr-text-dark);
+}
+.bg-black {
+  background-color: var(--clr-black);
+}
+
+/* Transparent tints */
+.bg-purple-10 {
+  background-color: var(--clr-purple-10);
+}
+.bg-purple-20 {
+  background-color: var(--clr-purple-20);
+}
+.bg-blue-purple-10 {
+  background-color: var(--clr-blue-purple-10);
+}
+.bg-blue-purple-20 {
+  background-color: var(--clr-blue-purple-20);
+}
+.bg-white-10 {
+  background-color: var(--clr-white-10);
+}
+.bg-white-25 {
+  background-color: var(--clr-white-25);
+}
+
+/* Gradients */
+.bg-gradient-hero {
+  background: linear-gradient(
+    135deg,
+    var(--clr-dark-navy) 0%,
+    #1a0a3d 50%,
+    #0d1a4a 100%
+  );
+}
+.bg-gradient-brand {
+  background: linear-gradient(
+    135deg,
+    var(--clr-blue-purple) 0%,
+    var(--clr-dark-purple) 50%,
+    var(--clr-deep-blue) 100%
+  );
+}
+.bg-gradient-purple {
+  background: linear-gradient(
+    135deg,
+    var(--clr-purple) 0%,
+    var(--clr-deep-blue) 100%
+  );
+}
+
+/* ===========================================
+   BORDER COLOR UTILITIES   .border-{name}
+   =========================================== */
+.border-purple {
+  border-color: var(--clr-purple);
+}
+.border-blue-purple {
+  border-color: var(--clr-blue-purple);
+}
+.border-green {
+  border-color: var(--clr-green);
+}
+.border-yellow {
+  border-color: var(--clr-yellow);
+}
+.border-gray-blue {
+  border-color: var(--clr-gray-blue);
+}
+.border-white {
+  border-color: var(--clr-white);
+}
+.border-white-25 {
+  border-color: var(--clr-white-25);
+}
+.border-white-50 {
+  border-color: var(--clr-white-50);
+}
+.border-light-purple {
+  border-color: var(--clr-light-purple);
+}
+
+/* ===========================================
+   FONT FAMILY UTILITIES
+   =========================================== */
+.font-base {
+  font-family: var(--font-family-base);
+}
+.font-mono {
+  font-family: var(--font-family-mono);
+}
+
+/* ===========================================
+   FONT SIZE UTILITIES    .text-{size}
+   =========================================== */
+.text-xs {
+  font-size: var(--font-size-xs);
+}
+.text-sm {
+  font-size: var(--font-size-sm);
+}
+.text-base {
+  font-size: var(--font-size-base);
+}
+.text-md {
+  font-size: var(--font-size-md);
+}
+.text-lg {
+  font-size: var(--font-size-lg);
+}
+.text-xl {
+  font-size: var(--font-size-xl);
+}
+.text-2xl {
+  font-size: var(--font-size-2xl);
+}
+.text-3xl {
+  font-size: var(--font-size-3xl);
+}
+.text-4xl {
+  font-size: var(--font-size-4xl);
+}
+
+/* ===========================================
+   FONT WEIGHT UTILITIES    .font-{weight}
+   =========================================== */
+.font-regular {
+  font-weight: var(--font-weight-regular);
+}
+.font-medium {
+  font-weight: var(--font-weight-medium);
+}
+.font-semibold {
+  font-weight: var(--font-weight-semibold);
+}
+.font-bold {
+  font-weight: var(--font-weight-bold);
+}
+.font-extrabold {
+  font-weight: var(--font-weight-extrabold);
+}
+
+/* ===========================================
+   LINE HEIGHT UTILITIES    .leading-{name}
+   =========================================== */
+.leading-tight {
+  line-height: var(--line-height-tight);
+}
+.leading-snug {
+  line-height: var(--line-height-snug);
+}
+.leading-normal {
+  line-height: var(--line-height-normal);
+}
+.leading-relaxed {
+  line-height: var(--line-height-relaxed);
+}
+
+/* ===========================================
+   LETTER SPACING UTILITIES   .tracking-{name}
+   =========================================== */
+.tracking-tight {
+  letter-spacing: var(--letter-spacing-tight);
+}
+.tracking-normal {
+  letter-spacing: var(--letter-spacing-normal);
+}
+.tracking-wide {
+  letter-spacing: var(--letter-spacing-wide);
+}
+.tracking-wider {
+  letter-spacing: var(--letter-spacing-wider);
+}
+
+/* ===========================================
+   TEXT ALIGNMENT UTILITIES
+   =========================================== */
+.text-left {
+  text-align: left;
+}
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
+
+/* ===========================================
+   TEXT TRANSFORM UTILITIES
+   =========================================== */
+.uppercase {
+  text-transform: uppercase;
+}
+.lowercase {
+  text-transform: lowercase;
+}
+.capitalize {
+  text-transform: capitalize;
+}
+.normal-case {
+  text-transform: none;
+}
+
+/* ===========================================
+   TEXT DECORATION UTILITIES
+   =========================================== */
+.underline {
+  text-decoration: underline;
+}
+.no-underline {
+  text-decoration: none;
+}
+.line-through {
+  text-decoration: line-through;
+}
+
+/* ===========================================
+   QUICK REFERENCE CHEATSHEET
+   ============================================
+
+   TEXT COLORS:
+   .text-purple | .text-blue-purple | .text-green | .text-dark-navy
+   .text-deep-blue | .text-yellow | .text-dark-purple | .text-gray-blue
+   .text-gold | .text-white | .text-dark | .text-muted | .text-black
+   .text-white-50 | .text-white-75
+
+   BACKGROUNDS:
+   .bg-purple | .bg-blue-purple | .bg-green | .bg-dark-navy
+   .bg-deep-blue | .bg-yellow | .bg-dark-purple | .bg-gray-blue
+   .bg-gold | .bg-white | .bg-light | .bg-light-purple | .bg-dark
+   .bg-purple-10 | .bg-purple-20 | .bg-blue-purple-10 | .bg-blue-purple-20
+   .bg-white-10 | .bg-white-25
+   .bg-gradient-hero | .bg-gradient-brand | .bg-gradient-purple
+
+   BORDERS:
+   .border-purple | .border-blue-purple | .border-green | .border-yellow
+   .border-gray-blue | .border-white | .border-white-25 | .border-white-50
+   .border-light-purple
+
+   FONT FAMILY:
+   .font-base | .font-mono
+
+   FONT SIZE:
+   .text-xs(12px) | .text-sm(14px) | .text-base(16px) | .text-md(18px)
+   .text-lg(20px) | .text-xl(24px) | .text-2xl(32px) | .text-3xl(40px) | .text-4xl(48px)
+
+   FONT WEIGHT:
+   .font-regular | .font-medium | .font-semibold | .font-bold | .font-extrabold
+
+   LINE HEIGHT:
+   .leading-tight | .leading-snug | .leading-normal | .leading-relaxed
+
+   LETTER SPACING:
+   .tracking-tight | .tracking-normal | .tracking-wide | .tracking-wider
+
+   ALIGNMENT:
+   .text-left | .text-center | .text-right
+
+   TRANSFORM:
+   .uppercase | .lowercase | .capitalize | .normal-case
+
+   DECORATION:
+   .underline | .no-underline | .line-through
+
+   =========================================== */

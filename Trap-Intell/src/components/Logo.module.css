@@ -1,0 +1,11 @@
+.navLogo {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: #111326;
+  letter-spacing: -0.3px;
+  flex-shrink: 0;
+}

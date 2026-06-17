@@ -1,0 +1,48 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+
+.valueCard {
+  background: #f8f8ff;
+  border: 1.5px solid #e8eaf0;
+  border-radius: 14px;
+  padding: 28px 20px;
+  text-align: center;
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.5s,
+    transform 0.5s,
+    box-shadow 0.2s;
+}
+
+.valueCard[data-visible="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.valueCard:hover {
+  box-shadow: 0 6px 24px rgba(64, 68, 228, 0.08);
+}
+
+.valueIcon {
+  width: 48px;
+  height: 48px;
+  background: rgba(64, 68, 228, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
+}
+
+.valueCard h4 {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #111326;
+  margin-bottom: 6px;
+}
+
+.valueCard p {
+  font-size: 0.82rem;
+  color: #555770;
+  line-height: 1.5;
+}

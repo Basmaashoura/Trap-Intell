@@ -1,0 +1,228 @@
+/* =========================================
+   CheckEmail.module.css — Trap-Intell Check Email Page
+   ========================================= */
+
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+
+/* ── Binary Background ── */
+.binaryBg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image: url("../Images/signup-bckg.png");
+  background-size: cover;
+  background-position: center;
+  opacity: 0.5;
+}
+
+/* ── Header / Logo ── */
+/* .header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  padding: 28px 36px;
+  display: flex;
+  align-items: center;
+} */
+
+.header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+  padding: 18px 40px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: transparent;
+}
+
+/* ── Page Shell ── */
+.page {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+}
+
+/* ── Card ── */
+.card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 52px 56px;
+  width: 100%;
+  max-width: 620px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  box-shadow:
+    0 2px 8px rgba(64, 68, 228, 0.06),
+    0 16px 48px rgba(0, 0, 0, 0.08);
+  animation: riseUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+
+/* ── Back Link ── */
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--clr-dark-navy);
+  text-decoration: none;
+  align-self: flex-start;
+  transition:
+    color 0.2s,
+    gap 0.2s;
+}
+
+.backLink svg {
+  transition: transform 0.2s;
+}
+
+.backLink:hover {
+  color: var(--clr-blue-purple);
+  gap: 10px;
+}
+
+.backLink:hover svg {
+  transform: translateX(-3px);
+}
+
+/* ── Card Header ── */
+.cardHeader {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cardTitle {
+  font-size: clamp(1.6rem, 2.5vw, 2rem);
+  font-weight: 800;
+  color: var(--clr-dark-navy);
+  letter-spacing: -0.6px;
+  line-height: 1.2;
+}
+
+.cardSubtitle {
+  font-size: 0.93rem;
+  color: var(--clr-text-muted);
+  font-weight: 400;
+}
+
+/* ── Check Circle Icon ── */
+.checkCircle {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: rgba(64, 68, 228, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: popIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.35s both;
+}
+
+.checkCircle svg {
+  width: 60px;
+  height: 60px;
+}
+
+/* ── Info Text ── */
+.cardInfo {
+  font-size: 0.97rem;
+  color: var(--clr-dark-navy);
+  line-height: 1.7;
+  text-align: center;
+  max-width: 420px;
+}
+
+.cardInfo strong {
+  color: var(--clr-dark-navy);
+  font-weight: 700;
+}
+
+/* ── Spam Note ── */
+.cardSpam {
+  font-size: 0.88rem;
+  color: var(--clr-text-muted);
+  text-align: center;
+  font-weight: 400;
+}
+
+/* ── Enter Code Button ── */
+.btnEnterCode {
+  display: inline-block;
+  padding: 13px 48px;
+  border: 2px solid var(--clr-blue-purple);
+  border-radius: 50px;
+  background: transparent;
+  color: var(--clr-blue-purple);
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    background 0.18s,
+    transform 0.15s,
+    box-shadow 0.18s;
+  margin-top: 4px;
+}
+
+.btnEnterCode:hover {
+  background: var(--clr-blue-purple-10);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(64, 68, 228, 0.15);
+}
+
+.btnEnterCode:active {
+  transform: translateY(0);
+}
+
+/* ── Animations ── */
+@keyframes fadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes riseUp {
+  from {
+    opacity: 0;
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .card {
+    padding: 36px 28px;
+  }
+}

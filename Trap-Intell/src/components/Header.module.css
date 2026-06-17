@@ -1,0 +1,148 @@
+/* Navbar.module.css */
+
+/* ── NAVBAR ─────────────────────────────── */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  height: 68px;
+  background: rgba(255, 255, 255, 0.92);
+  border-bottom: 1px solid transparent;
+  transition:
+    border-color 0.3s,
+    box-shadow 0.3s;
+}
+
+.scrolled {
+  border-color: #e8eaf0;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.07);
+}
+
+.navContainer {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 32px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 40px;
+}
+
+.navLinks {
+  display: flex;
+  list-style: none;
+  gap: 32px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.navLinks a {
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #555770;
+  transition: color 0.2s;
+}
+
+.navLinks a:hover {
+  color: #4044e4;
+}
+
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.navGlobe {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #555770;
+  display: flex;
+  align-items: center;
+  padding: 6px;
+  border-radius: 8px;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.navGlobe:hover {
+  background: rgba(64, 68, 228, 0.1);
+  color: #4044e4;
+}
+
+.btnTerminal {
+  padding: 9px 20px;
+  background: #4044e4;
+  color: #fff;
+  border-radius: 50px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s;
+  box-shadow: 0 4px 16px rgba(64, 68, 228, 0.3);
+}
+
+.btnTerminal:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(64, 68, 228, 0.4);
+}
+
+.navHamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  margin-left: auto;
+}
+
+.navHamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: #111326;
+  border-radius: 2px;
+  transition:
+    transform 0.3s,
+    opacity 0.3s;
+}
+
+/* Mobile menu open state */
+.open {
+  display: flex !important;
+}
+
+/* ── RESPONSIVE ──────────────────────────── */
+@media (max-width: 768px) {
+  .navLinks {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 68px;
+    left: 0;
+    right: 0;
+    background: #fff;
+    padding: 20px 32px;
+    border-bottom: 1px solid #e8eaf0;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    gap: 16px;
+  }
+
+  .navHamburger {
+    display: flex;
+  }
+
+  .navRight {
+    margin-left: auto;
+  }
+}

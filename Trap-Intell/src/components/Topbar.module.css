@@ -1,0 +1,162 @@
+.topbar {
+  height: 60px;
+  background: #fff;
+  border-bottom: 1px solid #e8eaf0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 0 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  flex-shrink: 0;
+}
+
+/* hamburger — mobile only */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  flex-shrink: 0;
+}
+.hamburger span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: #111326;
+  border-radius: 2px;
+}
+
+/* search */
+.search {
+  flex: 1;
+  max-width: 440px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f4f5f9;
+  border: 1px solid #e8eaf0;
+  border-radius: 8px;
+  padding: 8px 14px;
+}
+.search input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 0.85rem;
+  color: #111326;
+  outline: none;
+}
+.search input::placeholder { color: #9098b1; }
+
+/* right section */
+.right {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-left: auto;
+}
+
+.orgIndicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #555770;
+  background: #f4f5f9;
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid #e8eaf0;
+  white-space: nowrap;
+}
+.orgDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #2ace5f;
+  flex-shrink: 0;
+}
+
+/* notification */
+.notifBtn {
+  position: relative;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #555770;
+  display: flex;
+  align-items: center;
+  padding: 6px;
+  border-radius: 8px;
+  transition: background 0.15s, color 0.15s;
+}
+.notifBtn:hover {
+  background: #f4f5f9;
+  color: #111326;
+}
+.notifBadge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #e74c3c;
+  border: 1.5px solid #fff;
+}
+
+.divider {
+  width: 1px;
+  height: 24px;
+  background: #e8eaf0;
+  flex-shrink: 0;
+}
+
+/* profile */
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+.profileInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+.profileName {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #111326;
+}
+.profileRole {
+  font-size: 0.72rem;
+  color: #9098b1;
+}
+.profileAvatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4044e4, #8a1bfa);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+  .hamburger { display: flex; }
+  .orgIndicator { display: none; }
+  .profileInfo { display: none; }
+  .search { max-width: 200px; }
+}

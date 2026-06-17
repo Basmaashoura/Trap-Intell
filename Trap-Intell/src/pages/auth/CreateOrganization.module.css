@@ -1,0 +1,246 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+
+.container {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  background: #fff;
+}
+
+.binaryBg {
+  position: fixed;
+  inset: 0;
+  background-image: url("../Images/signup-bckg.png");
+  background-size: cover;
+  background-position: center;
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.header {
+  position: fixed;
+  top: 22px;
+  left: 36px;
+  z-index: 20;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #121826;
+}
+
+.page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.leftPanel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 48px;
+}
+
+.rightPanel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 32px;
+  height: 100vh;
+}
+
+.heroImageWrap {
+  width: 100%;
+  max-width: 560px;
+  max-height: calc(100vh - 48px);
+  border-radius: 24px;
+  overflow: hidden;
+  aspect-ratio: 9/12;
+  box-shadow:
+    0 0 0 1px rgba(64, 68, 228, 0.08),
+    0 32px 80px rgba(0, 0, 0, 0.22),
+    0 8px 24px rgba(0, 0, 0, 0.12);
+  animation: riseUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+
+.heroImageWrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  object-fit: cover;
+}
+
+.formCard {
+  width: 100%;
+  max-width: 600px;
+}
+
+.formHeader {
+  text-align: center;
+  margin-bottom: 36px;
+}
+
+.formTitle {
+  font-size: clamp(2rem, 4vw, 2.7rem);
+  font-weight: 800;
+  margin-bottom: 10px;
+  color: #121826;
+}
+
+.formSubtitle {
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.formGroup {
+  position: relative;
+}
+
+.full {
+  grid-column: 1 / -1;
+}
+
+.fieldWrap {
+  position: relative;
+}
+
+.fieldWrap label {
+  position: absolute;
+  top: -9px;
+  left: 12px;
+  background: #fff;
+  padding: 0 5px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+.fieldWrap input,
+.fieldWrap select {
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1.5px solid #c8cce0;
+  outline: none;
+  font-size: 0.95rem;
+  background: transparent;
+  transition: 0.2s ease;
+}
+
+.fieldWrap input:focus,
+.fieldWrap select:focus {
+  border-color: #4f46e5;
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+}
+
+.checkboxRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.checkboxLabel {
+  font-size: 0.9rem;
+  color: #6b7280;
+}
+
+.btnRow {
+  display: flex;
+  gap: 14px;
+}
+
+.btnBack,
+.btnCreate {
+  flex: 1;
+  border: none;
+  border-radius: 999px;
+  padding: 14px 24px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.btnBack {
+  border: 2px solid #4f46e5;
+  color: #4f46e5;
+  background: transparent;
+}
+
+.btnBack:hover {
+  background: rgba(79, 70, 229, 0.08);
+}
+
+.btnCreate {
+  background: #4f46e5;
+  color: white;
+  box-shadow: 0 6px 24px rgba(79, 70, 229, 0.35);
+}
+
+.btnCreate:hover {
+  transform: translateY(-2px);
+}
+
+.btnCreate:disabled {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+.shake {
+  animation: shake 0.4s;
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-6px);
+  }
+
+  75% {
+    transform: translateX(6px);
+  }
+}
+
+@media (max-width: 900px) {
+  .page {
+    grid-template-columns: 1fr;
+  }
+
+  .rightPanel {
+    display: none;
+  }
+
+  .leftPanel {
+    padding: 120px 24px 48px;
+  }
+
+  .formGrid {
+    grid-template-columns: 1fr;
+  }
+}

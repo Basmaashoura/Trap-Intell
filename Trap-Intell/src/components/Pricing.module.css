@@ -1,0 +1,262 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+
+.sectionContainer {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 96px 32px;
+}
+
+.sectionTitle {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 800;
+  color: #111326;
+  text-align: center;
+  letter-spacing: -0.5px;
+  margin-bottom: 12px;
+}
+
+.sectionSubtitle {
+  font-size: 0.95rem;
+  color: #555770;
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto 56px;
+  line-height: 1.7;
+}
+
+.pricing {
+  background: #f8f8ff;
+}
+
+.pricingToggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin-bottom: 48px;
+  background: #e8eaf0;
+  border-radius: 50px;
+  padding: 4px;
+  width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+}
+
+.toggleBtn {
+  padding: 9px 24px;
+  border: none;
+  border-radius: 50px;
+  background: transparent;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #555770;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.toggleBtnActive {
+  background: #fff;
+  color: #111326;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.toggleBadge {
+  position: absolute;
+  right: -70px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: #2ace5f;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 3px 9px;
+  border-radius: 50px;
+  white-space: nowrap;
+}
+
+.pricingGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+.priceCard {
+  background: #fff;
+  border: 1.5px solid #e8eaf0;
+  border-radius: 20px;
+  padding: 36px 28px;
+  position: relative;
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.5s,
+    transform 0.5s,
+    box-shadow 0.2s;
+}
+
+.priceCard[data-visible="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.priceFeatured {
+  background: #4044e4;
+  border-color: #4044e4;
+  box-shadow: 0 16px 48px rgba(64, 68, 228, 0.3);
+  transform: translateY(-8px) !important;
+}
+
+.priceFeatured[data-visible="true"] {
+  transform: translateY(-8px) !important;
+}
+
+.popularBadge {
+  position: absolute;
+  top: -14px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #feca2f;
+  color: #111326;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 4px 16px;
+  border-radius: 50px;
+  white-space: nowrap;
+}
+
+.priceTier {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #111326;
+  margin-bottom: 6px;
+}
+
+.priceFeatured .priceTier {
+  color: #fff;
+}
+
+.priceDesc {
+  font-size: 0.84rem;
+  color: #555770;
+  margin-bottom: 24px;
+}
+
+.priceFeatured .priceDesc {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.priceAmount {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  margin-bottom: 28px;
+}
+
+.priceCurrency {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #111326;
+}
+
+.priceFeatured .priceCurrency {
+  color: #fff;
+}
+
+.priceNum {
+  font-size: 2.8rem;
+  font-weight: 800;
+  color: #111326;
+  line-height: 1;
+}
+
+.priceFeatured .priceNum {
+  color: #fff;
+}
+
+.pricePeriod {
+  font-size: 0.85rem;
+  color: #555770;
+  margin-left: 2px;
+}
+
+.priceFeatured .pricePeriod {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.priceFeatures {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+
+.priceFeatures li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.88rem;
+  color: #555770;
+}
+
+.priceFeatured .priceFeatures li {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.btnPlan {
+  width: 100%;
+  padding: 13px 24px;
+  border-radius: 50px;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s,
+    background 0.18s;
+}
+
+.btnPlanOutline {
+  background: transparent;
+  border: 2px solid #d0d3e8;
+  color: #555770;
+}
+
+.btnPlanOutline:hover {
+  border-color: #4044e4;
+  color: #4044e4;
+}
+
+.btnPlanWhite {
+  background: #fff;
+  border: none;
+  color: #4044e4;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.btnPlanWhite:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .pricingGrid {
+    grid-template-columns: 1fr;
+  }
+  .priceFeatured {
+    transform: none !important;
+  }
+}
+
+@media (max-width: 500px) {
+  .sectionContainer {
+    padding: 72px 20px;
+  }
+}

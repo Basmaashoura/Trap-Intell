@@ -1,0 +1,43 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+
+.mvCard {
+  background: #f8f8ff;
+  border: 1.5px solid #e8eaf0;
+  border-radius: 16px;
+  padding: 32px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.5s,
+    transform 0.5s;
+}
+
+.mvCard[data-visible="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.mvIcon {
+  width: 44px;
+  height: 44px;
+  background: rgba(64, 68, 228, 0.1);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  color: #4044e4;
+}
+
+.mvCard h3 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #111326;
+  margin-bottom: 10px;
+}
+
+.mvCard p {
+  font-size: 0.9rem;
+  color: #555770;
+  line-height: 1.7;
+}

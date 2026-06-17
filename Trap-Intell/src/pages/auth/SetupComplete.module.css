@@ -1,0 +1,147 @@
+/* setup-complete.module.css */
+
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+
+/* ── Reset ── */
+.container *,
+.container *::before,
+.container *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Page Wrapper ── */
+.container {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  min-height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ── Full-page Blue Gradient Background ── */
+.binaryBg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: linear-gradient(160deg, #4a50f5 0%, #3a3edf 40%, #3030c8 100%);
+}
+
+/* ── Binary numbers overlay ── */
+.binaryBg::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("../Images/signup-bckg.png");
+  background-size: cover;
+  background-position: center;
+  opacity: 0.18;
+  mix-blend-mode: overlay;
+}
+
+/* ── Radial glow behind the circle ── */
+.binaryBg::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -68%);
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    rgba(255, 255, 255, 0.18) 0%,
+    transparent 70%
+  );
+  pointer-events: none;
+}
+
+/* ── Page Shell ── */
+.page {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  padding: 40px 24px;
+}
+
+/* ── Check Circle ── */
+.checkCircle {
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 0 0 24px rgba(255, 255, 255, 0.08),
+    0 0 80px rgba(255, 255, 255, 0.15);
+
+  animation: popIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+
+/* Animated checkmark draw */
+.checkPath {
+  stroke-dasharray: 200;
+  stroke-dashoffset: 200;
+  animation: drawCheck 0.6s ease forwards 0.7s;
+}
+
+/* ── Title ── */
+.title {
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: -0.8px;
+  line-height: 1.15;
+  text-align: center;
+
+  animation: riseUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
+}
+
+/* ── Subtitle ── */
+.subtitle {
+  font-size: 1.05rem;
+  color: rgba(255, 255, 255, 0.65);
+  font-weight: 400;
+  text-align: center;
+
+  animation: riseUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) 0.52s both;
+}
+
+/* ── Animations ── */
+@keyframes popIn {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes drawCheck {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes riseUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,111 @@
+/* =========================================
+   home.css — Trap-Intell Homepage
+   ========================================= */
+
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --clr-purple: #8a1bfa;
+  --clr-blue-purple: #4044e4;
+  --clr-green: #2ace5f;
+  --clr-dark-navy: #111326;
+  --clr-text-muted: #555770;
+  --clr-white: #ffffff;
+  --clr-light-bg: #f8f8ff;
+  --clr-blue-purple-10: rgba(64, 68, 228, 0.1);
+  --nav-h: 68px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  background: var(--clr-white);
+  color: var(--clr-dark-navy);
+  overflow-x: hidden;
+}
+
+/* ── SHARED SECTION STYLES ───────────────── */
+
+/* ── CTA ─────────────────────────────────── */
+.cta {
+  background: linear-gradient(135deg, var(--clr-blue-purple) 0%, #6a1bfa 100%);
+  padding: 0;
+}
+.cta-inner {
+  text-align: center;
+  padding: 96px 32px;
+}
+.cta h2 {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.4px;
+  margin-bottom: 14px;
+}
+.cta p {
+  font-size: 0.97rem;
+  color: rgba(255, 255, 255, 0.75);
+  max-width: 520px;
+  margin: 0 auto 36px;
+  line-height: 1.7;
+}
+.cta-btns {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.btn-cta-primary {
+  padding: 13px 32px;
+  background: #fff;
+  color: var(--clr-blue-purple);
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+.btn-cta-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.2);
+}
+.btn-cta-outline {
+  padding: 12px 32px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  color: #fff;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+}
+.btn-cta-outline:hover {
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ── RESPONSIVE ──────────────────────────── */
+@media (max-width: 1024px) {
+}
+
+@media (max-width: 768px) {
+}
+
+@media (max-width: 500px) {
+}

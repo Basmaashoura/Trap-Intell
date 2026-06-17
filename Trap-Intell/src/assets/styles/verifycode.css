@@ -1,0 +1,323 @@
+/* =========================================
+   Verifycode.css — Trap-Intell Forgot Password Page
+   ========================================= */
+
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+
+body {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  background-color: var(--clr-white);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ── Header / Logo ── */
+/* ── Logo (top-left) ── */
+header {
+  position: relative;
+  z-index: 10;
+  padding: 18px 40px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: transparent;
+}
+.logo {
+  position: fixed;
+  top: 22px;
+  left: 36px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: fadeDown 0.6s ease both;
+  text-decoration: none;
+}
+
+.logo-text {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: var(--clr-dark-navy);
+  letter-spacing: -0.3px;
+}
+.logo h3 {
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-weight: 800;
+  font-size: 1.2rem;
+  color: var(--clr-dark-navy);
+  letter-spacing: -0.3px;
+  margin: 0;
+  line-height: 1;
+}
+
+/* ── Page Shell ── */
+.page {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+/* ── Left Panel — Form ── */
+.left-panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 140px 72px 60px 72px;
+}
+
+/* ── Back Link ── */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--clr-dark-navy);
+  text-decoration: none;
+  margin-bottom: 32px;
+  width: fit-content;
+  transition:
+    color 0.2s,
+    gap 0.2s;
+  animation: fadeIn 0.5s ease 0.15s both;
+}
+
+.back-link svg {
+  transition: transform 0.2s;
+}
+
+.back-link:hover {
+  color: var(--clr-blue-purple);
+  gap: 10px;
+}
+
+.back-link:hover svg {
+  transform: translateX(-3px);
+}
+
+/* ── Form Card ── */
+.form-card {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  animation: riseUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+
+/* ── Form Header ── */
+.form-header {
+  /* display: flex; */
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-title {
+  font-size: clamp(1.9rem, 3vw, 2.5rem);
+  font-weight: 800;
+  color: var(--clr-dark-navy);
+  letter-spacing: 0.5px;
+  line-height: 1.15;
+}
+
+.form-subtitle {
+  font-size: 0.93rem;
+  color: var(--clr-text-muted);
+  font-weight: 400;
+  line-height: 1.6;
+  max-width: 420px;
+  margin-bottom: 20px;
+}
+/* ── Form Grid ── */
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  position: relative;
+}
+
+/* ── Floating Label Field ── */
+.field-wrap {
+  position: relative;
+}
+
+.field-wrap label {
+  position: absolute;
+  top: -9px;
+  left: 12px;
+  background: var(--clr-white);
+  padding: 0 4px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--clr-text-muted);
+  z-index: 1;
+  pointer-events: none;
+  transition: color 0.2s;
+}
+
+.field-wrap input {
+  width: 100%;
+  border: 1.5px solid #c8cce0;
+  border-radius: 8px;
+  padding: 14px 16px;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 0.92rem;
+  color: var(--clr-dark-navy);
+  background: transparent;
+  outline: none;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
+}
+
+.field-wrap input::placeholder {
+  color: #aab0c6;
+}
+
+.field-wrap input:focus {
+  border-color: var(--clr-blue-purple);
+  box-shadow: 0 0 0 3px var(--clr-blue-purple-10);
+}
+
+.field-wrap:focus-within label {
+  color: var(--clr-blue-purple);
+}
+.resend-link a {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--clr-purple);
+  text-decoration: none;
+  transition: opacity 0.2s;
+}
+
+.resend-link a:hover {
+  opacity: 0.75;
+  text-decoration: underline;
+}
+/* ── Submit Button ── */
+.btn-submit {
+  width: 100%;
+  padding: 15px 24px;
+  background: var(--clr-blue-purple);
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 6px 24px rgba(64, 68, 228, 0.35);
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s;
+}
+
+.btn-submit::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.15) 0%,
+    transparent 60%
+  );
+  pointer-events: none;
+}
+
+.btn-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 32px rgba(64, 68, 228, 0.45);
+}
+
+.btn-submit:active {
+  transform: translateY(0);
+}
+/* ── Right Panel — Hero Image ── */
+.right-panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 40px 48px 24px;
+}
+
+.hero-image-wrap {
+  width: 100%;
+  max-width: 560px;
+  max-height: 700px;
+  border-radius: 24px;
+  overflow: hidden;
+  aspect-ratio: 3/4;
+  position: relative;
+  box-shadow:
+    0 0 0 1px rgba(64, 68, 228, 0.08),
+    0 32px 80px rgba(0, 0, 0, 0.18),
+    0 8px 24px rgba(0, 0, 0, 0.1);
+  animation: riseUp 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+  background: #0a0a1a;
+}
+
+.hero-image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+/* ── Animations ── */
+@keyframes fadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes riseUp {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .page {
+    grid-template-columns: 1fr;
+  }
+
+  .right-panel {
+    display: none;
+  }
+
+  .left-panel {
+    padding: 120px 32px 60px;
+  }
+}
