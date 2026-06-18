@@ -1,0 +1,2 @@
+// EF Core migrations will be auto-generated here
+// Use: dotnet ef migrations add InitialCreate

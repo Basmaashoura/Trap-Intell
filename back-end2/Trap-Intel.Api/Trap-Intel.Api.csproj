@@ -1,0 +1,38 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+<PropertyGroup>
+  <TargetFramework>net9.0</TargetFramework>
+  <Nullable>enable</Nullable>
+  <ImplicitUsings>enable</ImplicitUsings>
+  <RootNamespace>Trap_Intel.Api</RootNamespace>
+  <UserSecretsId>12b6feb9-b29e-4c28-a8f1-08411e1378ab</UserSecretsId>
+  <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+</PropertyGroup>
+
+<ItemGroup>
+  <PackageReference Include="MediatR" Version="12.4.1" />
+  <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+  <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0">
+    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    <PrivateAssets>all</PrivateAssets>
+  </PackageReference>
+  <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.23.0" />
+  <PackageReference Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="9.0.0" />
+  <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.9.0" />
+  <PackageReference Include="OpenTelemetry.Exporter.Prometheus.AspNetCore" Version="1.9.0-beta.1" />
+  <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.9.0" />
+  <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.9.0" />
+  <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.9.0" />
+  <PackageReference Include="OpenTelemetry.Instrumentation.Runtime" Version="1.9.0" />
+  <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+  <PackageReference Include="Serilog.Sinks.Seq" Version="8.0.0" />
+  <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+</ItemGroup>
+
+<ItemGroup>
+  <ProjectReference Include="..\Trap-Intel.Infrastructure\Trap-Intel.Infrastructure.csproj" />
+  <ProjectReference Include="..\Trap-intell.Application\Trap-intell.Application.csproj" />
+</ItemGroup>
+
+
+</Project>

@@ -1,0 +1,33 @@
+{
+  "TimestampUtc": "2026-04-17T06:12:08.0166216Z",
+  "BaseUrl": "http://localhost:5000",
+  "BootstrapOrganizationId": "11111111-1111-1111-1111-111111111111",
+  "ScenarioOrganizationId": "ca724342-2f86-4137-9eca-47a428a2ef92",
+  "PlanAId": "62b47561-314b-423f-82f1-34ac995cef73",
+  "PlanBId": "20cfd9b8-e632-42dc-a444-5b8dd53dba77",
+  "SubscriptionId": "4ac0ed45-c839-494a-a9d8-3eedaf7c3cbc",
+  "PaymentMethodId": "0d350dc6-73c2-4fb2-b3f0-22076d77c3bf",
+  "AllPlansSubscriptionsQuota200ScenariosPassed": true,
+  "AllPlansSubscriptionsQuotaNegativeScenariosPassed": true,
+  "AllPlansSubscriptionsQuotaSecurityScenariosPassed": true,
+  "MatrixSummary": {
+    "Positive200": {
+      "Total": 33,
+      "Passed": 33,
+      "Failed": 0,
+      "FailedScenarios": []
+    },
+    "Negative4xx": {
+      "Total": 7,
+      "Passed": 7,
+      "Failed": 0,
+      "FailedScenarios": []
+    },
+    "Security401403": {
+      "Total": 13,
+      "Passed": 13,
+      "Failed": 0,
+      "FailedScenarios": []
+    }
+  }
+}
