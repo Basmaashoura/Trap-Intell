@@ -35,16 +35,19 @@ function App() {
         <Route path="/setup-complete" element={<SetupComplete />} />
 
         {/* App routes — with sidebar/navbar via AppLayout */}
-        <ProtectedRoute>
-          <Route element={<AppLayout />}>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            {/* add more app pages here as you build them */}
-            {/* <Route path="/honeypots" element={<HoneypotsPage />} /> */}
-            <Route path="/attacks" element={<AttacksPage />} />
-            <Route path="/alerts" element={<AlertsPage />} />
-          </Route>
-        </ProtectedRoute>
+        <Route
+          element={
+            <ProtectedRoute>
+              <AppLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="/" element={<HomePage />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          {/* <Route path="/honeypots" element={<HoneypotsPage />} /> */}
+          <Route path="/attacks" element={<AttacksPage />} />
+          <Route path="/alerts" element={<AlertsPage />} />
+        </Route>
 
         <Route path="*" element={<PageNotFound />} />
       </Routes>
