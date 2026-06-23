@@ -1,7 +1,13 @@
+// Route: /reset-password?token=xxx
+// The token comes from the email link query param.
+// Backend: POST /api/auth/reset-password  { token, newPassword }
+
 import { useState } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import Logo from "../../components/Logo";
 import resetImage from "../../assets/images/reset-pass.png";
 import styles from "./SetPasswordPage.module.css";
+import api from "../../services/api";
 
 const EyeIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -16,9 +22,106 @@ const EyeIcon = () => (
   </svg>
 );
 
+function validate(password, confirm) {
+  if (!password) return "Password is required.";
+  if (password.length < 8) return "Password must be at least 8 characters.";
+  if (!/[A-Z]/.test(password)) return "Include at least one uppercase letter.";
+  if (!/[a-z]/.test(password)) return "Include at least one lowercase letter.";
+  if (!/[0-9]/.test(password)) return "Include at least one number.";
+  if (!/[^A-Za-z0-9]/.test(password))
+    return "Include at least one special character.";
+  if (password !== confirm) return "Passwords do not match.";
+  return null;
+}
+
 function SetPasswordPage() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const token = searchParams.get("token");
+
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [done, setDone] = useState(false);
+
+  // No token in URL — show error immediately
+  if (!token) {
+    return (
+      <>
+        <header className={styles.header}>
+          <Logo />
+        </header>
+        <main>
+          <div className={styles.resPage}>
+            <div className={styles.formPanel}>
+              <div className={styles.formCard}>
+                <div className={styles.invalidCard}>
+                  <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                    <circle cx="24" cy="24" r="24" fill="#fff5f5" />
+                    <path
+                      d="M16 16l16 16M32 16L16 32"
+                      stroke="#e53e3e"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <h1 className={styles.formTitle}>Invalid Link</h1>
+                  <p className={styles.formSubtitle}>
+                    This password reset link is missing a token. Please request
+                    a new reset link.
+                  </p>
+                  <button
+                    type="button"
+                    className={styles.btnSubmit}
+                    onClick={() => navigate("/forgot-password")}
+                  >
+                    Request New Link
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div className={styles.imagePanel}>
+              <div className={styles.heroImageWrap}>
+                <img src={resetImage} alt="reset password" />
+              </div>
+            </div>
+          </div>
+        </main>
+      </>
+    );
+  }
+
+  const handleReset = async () => {
+    setError("");
+    const validationError = validate(password, confirm);
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await api.post("/auth/reset-password", { token, newPassword: password });
+      setDone(true);
+    } catch (err) {
+      const code = err?.response?.data?.errors?.[0]?.code;
+      if (
+        code === "Identity.InvalidToken" ||
+        code === "Identity.TokenExpired"
+      ) {
+        setError(
+          "This reset link has expired or is invalid. Please request a new one.",
+        );
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -28,71 +131,178 @@ function SetPasswordPage() {
 
       <main>
         <div className={styles.resPage}>
-          {/* Form panel */}
           <div className={styles.formPanel}>
             <div className={styles.formCard}>
-              <div className={styles.formHeader}>
-                <h1 className={styles.formTitle}>Set a Password</h1>
-                <p className={styles.formSubtitle}>
-                  Your previous password has been reseted. Please set a new
-                  password for your account.
-                </p>
-              </div>
-
-              <div className={styles.formGrid}>
-                {/* New Password */}
-                <div className={styles.formGroup}>
-                  <div className={styles.fieldWrap}>
-                    <label htmlFor="password">New Password</label>
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      id="password"
-                      name="password"
-                      required
-                      placeholder="Password"
-                    />
-                    <span
-                      onClick={() => setShowPassword(!showPassword)}
-                      style={{ cursor: "pointer" }}
-                    >
-                      <EyeIcon />
-                    </span>
+              {done ? (
+                /* ── Success state ── */
+                <div className={styles.successCard}>
+                  <div className={styles.successIcon}>
+                    <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                      <circle
+                        cx="28"
+                        cy="28"
+                        r="28"
+                        fill="#4044e4"
+                        fillOpacity="0.12"
+                      />
+                      <path
+                        d="M18 28.5L24.5 35.5L38 21"
+                        stroke="#4044e4"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      />
+                      <path
+                        d="M28 14C20.268 14 14 20.268 14 28C14 35.732 20.268 42 28 42C35.732 42 42 35.732 42 28C42 20.268 35.732 14 28 14Z"
+                        stroke="#4044e4"
+                        strokeWidth="2.5"
+                      />
+                    </svg>
                   </div>
-                </div>
-
-                {/* Confirm Password */}
-                <div className={styles.formGroup}>
-                  <div className={styles.fieldWrap}>
-                    <label htmlFor="confirm-password">
-                      Confirm New Password
-                    </label>
-                    <input
-                      type={showConfirm ? "text" : "password"}
-                      id="confirm-password"
-                      name="confirm-password"
-                      placeholder="Password"
-                      required
-                    />
-                    <span
-                      onClick={() => setShowConfirm(!showConfirm)}
-                      style={{ cursor: "pointer" }}
-                    >
-                      <EyeIcon />
-                    </span>
-                  </div>
-                </div>
-
-                {/* Submit */}
-                <div className={styles.formGroup}>
-                  <button type="button" className={styles.btnSubmit}>
-                    Set Password
+                  <h1 className={styles.formTitle}>Password Updated</h1>
+                  <p className={styles.formSubtitle}>
+                    Your password has been changed successfully. You can now log
+                    in with your new password.
+                  </p>
+                  <button
+                    type="button"
+                    className={styles.btnSubmit}
+                    onClick={() => navigate("/login")}
+                  >
+                    Go to Login
                   </button>
                 </div>
-              </div>
+              ) : (
+                /* ── Form state ── */
+                <>
+                  <div className={styles.formHeader}>
+                    <h1 className={styles.formTitle}>Set a New Password</h1>
+                    <p className={styles.formSubtitle}>
+                      Choose a strong password for your account.
+                    </p>
+                  </div>
+
+                  {error && (
+                    <div className={styles.errorBanner} role="alert">
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                      >
+                        <circle
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="#e53e3e"
+                          strokeWidth="2"
+                        />
+                        <path
+                          d="M12 8v4M12 16h.01"
+                          stroke="#e53e3e"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                        />
+                      </svg>
+                      {error}
+                    </div>
+                  )}
+
+                  <div className={styles.formGrid}>
+                    {/* New Password */}
+                    <div className={styles.formGroup}>
+                      <div className={styles.fieldWrap}>
+                        <label htmlFor="password">New Password</label>
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          id="password"
+                          placeholder="Create a strong password"
+                          value={password}
+                          onChange={(e) => {
+                            setPassword(e.target.value);
+                            setError("");
+                          }}
+                          disabled={loading}
+                          required
+                        />
+                        <span
+                          onClick={() => setShowPassword(!showPassword)}
+                          style={{ cursor: "pointer" }}
+                        >
+                          <EyeIcon />
+                        </span>
+                      </div>
+                      <p className={styles.pwHint}>
+                        Min 8 chars · 1 uppercase · 1 lowercase · 1 number · 1
+                        special character
+                      </p>
+                    </div>
+
+                    {/* Confirm Password */}
+                    <div className={styles.formGroup}>
+                      <div className={styles.fieldWrap}>
+                        <label htmlFor="confirm-password">
+                          Confirm New Password
+                        </label>
+                        <input
+                          type={showConfirm ? "text" : "password"}
+                          id="confirm-password"
+                          placeholder="Repeat your password"
+                          value={confirm}
+                          onChange={(e) => {
+                            setConfirm(e.target.value);
+                            setError("");
+                          }}
+                          disabled={loading}
+                          required
+                        />
+                        <span
+                          onClick={() => setShowConfirm(!showConfirm)}
+                          style={{ cursor: "pointer" }}
+                        >
+                          <EyeIcon />
+                        </span>
+                        {/* Match indicator */}
+                        {confirm && (
+                          <span
+                            className={styles.matchIndicator}
+                            style={{
+                              color:
+                                password === confirm ? "#38a169" : "#e53e3e",
+                            }}
+                          >
+                            {password === confirm
+                              ? "✓ Passwords match"
+                              : "✗ Passwords don't match"}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Submit */}
+                    <div className={styles.formGroup}>
+                      <button
+                        type="button"
+                        className={styles.btnSubmit}
+                        onClick={handleReset}
+                        disabled={loading || !password || !confirm}
+                      >
+                        {loading ? (
+                          <span
+                            className={styles.spinner}
+                            aria-label="Updating…"
+                          />
+                        ) : (
+                          "Set Password"
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 
-          {/* Image panel */}
           <div className={styles.imagePanel}>
             <div className={styles.heroImageWrap}>
               <img src={resetImage} alt="reset password" />

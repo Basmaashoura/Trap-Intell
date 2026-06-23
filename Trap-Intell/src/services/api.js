@@ -13,6 +13,7 @@ export const tokenStorage = {
     localStorage.removeItem("refresh_token");
     localStorage.removeItem("org_id");
     localStorage.removeItem("user");
+    localStorage.removeItem("permissions");
   },
 };
 
@@ -32,7 +33,6 @@ async function refreshAccessToken() {
       return res.json();
     })
     .then((data) => {
-      // adjust these keys to match what your API actually returns
       tokenStorage.setTokens(data.accessToken, data.refreshToken);
       return data.accessToken;
     })
@@ -46,6 +46,20 @@ async function refreshAccessToken() {
     });
 
   return refreshPromise;
+}
+
+// Auth endpoints that should NEVER trigger a token refresh on 401
+// (401 on these means bad credentials, not expired token)
+const NO_REFRESH_ENDPOINTS = [
+  "/api/auth/login",
+  "/api/auth/register",
+  "/api/auth/refresh",
+  "/api/auth/forgot-password",
+  "/api/auth/reset-password",
+];
+
+function isNoRefreshEndpoint(endpoint) {
+  return NO_REFRESH_ENDPOINTS.some((e) => endpoint.includes(e));
 }
 
 // ── Core request function ──────────────────────────────────────
@@ -64,7 +78,8 @@ async function request(endpoint, options = {}, retry = true) {
   });
 
   // Token expired — try refresh once
-  if (response.status === 401 && retry) {
+  // BUT skip refresh for auth endpoints (401 there = bad credentials)
+  if (response.status === 401 && retry && !isNoRefreshEndpoint(endpoint)) {
     try {
       await refreshAccessToken();
       return request(endpoint, options, false);
@@ -79,13 +94,16 @@ async function request(endpoint, options = {}, retry = true) {
 // ── Response parser ────────────────────────────────────────────
 async function parseResponse(response) {
   const contentType = response.headers.get("content-type");
-  const isJson = contentType && contentType.includes("application/json");
+  const isJson =
+    contentType &&
+    (contentType.includes("application/json") ||
+      contentType.includes("application/problem+json"));
 
   if (!response.ok) {
     let errorMessage = `HTTP ${response.status}`;
     if (isJson) {
       const errorData = await response.json();
-      // RFC 7807 Problem Details format
+      // RFC 7807 Problem Details: use detail → title → message → fallback
       errorMessage =
         errorData.detail ||
         errorData.title ||

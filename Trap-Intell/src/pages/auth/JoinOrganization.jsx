@@ -1,31 +1,245 @@
+// Route: /join/:token  (or /join?token=xxx — see note below)
+// The invitation token comes from the URL param.
+// Backend docs:
+//   GET  /api/invitations/{token}               → org name, role, invited-by, email, expiresAt
+//   POST /api/invitations/{token}/accept        → { firstName, lastName, password }
+//   POST /api/invitations/{token}/decline       → {}
+
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import styles from "./JoinOrganization.module.css";
 import verifyImage from "../../assets/images/verfiy.png";
 import Logo from "../../components/Logo";
+import { api } from "../../services/api"; // ← your axios instance with baseURL + interceptors
+
+const EyeIcon = () => (
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+    <path
+      d="M20.25 21C20.1515 21.0001 20.0539 20.9808 19.9629 20.9431C19.8719 20.9053 19.7893 20.85 19.7198 20.7801L3.21982 4.28013C3.0851 4.13833 3.01111 3.94952 3.01361 3.75395C3.01612 3.55838 3.09492 3.37152 3.23322 3.23322C3.37152 3.09492 3.55838 3.01612 3.75395 3.01361C3.94952 3.01111 4.13833 3.0851 4.28013 3.21982L20.7801 19.7198C20.885 19.8247 20.9563 19.9583 20.9852 20.1038C21.0141 20.2492 20.9993 20.3999 20.9426 20.5369C20.8858 20.6739 20.7897 20.791 20.6665 20.8735C20.5432 20.9559 20.3983 20.9999 20.25 21ZM11.625 14.8054L9.19732 12.3778C9.18341 12.364 9.16552 12.3549 9.14618 12.3518C9.12684 12.3487 9.10701 12.3517 9.08948 12.3604C9.07194 12.3692 9.05759 12.3832 9.04843 12.4005C9.03927 12.4178 9.03577 12.4376 9.03841 12.457C9.13642 13.0868 9.43215 13.6692 9.88286 14.1199C10.3336 14.5706 10.9159 14.8663 11.5458 14.9643C11.5652 14.967 11.5849 14.9635 11.6022 14.9543C11.6196 14.9452 11.6336 14.9308 11.6423 14.9133C11.651 14.8957 11.6541 14.8759 11.651 14.8566C11.6479 14.8372 11.6388 14.8194 11.625 14.8054ZM12.375 9.1945L14.8064 11.625C14.8203 11.639 14.8382 11.6482 14.8576 11.6514C14.8771 11.6547 14.897 11.6517 14.9147 11.6429C14.9323 11.6341 14.9467 11.62 14.9559 11.6026C14.9651 11.5851 14.9685 11.5653 14.9658 11.5458C14.868 10.9151 14.572 10.3319 14.1208 9.88059C13.6695 9.4293 13.0863 9.13336 12.4556 9.0356C12.4361 9.03258 12.4161 9.03582 12.3985 9.04484C12.3809 9.05386 12.3666 9.06821 12.3577 9.08583C12.3488 9.10346 12.3456 9.12345 12.3487 9.14297C12.3518 9.16249 12.361 9.18052 12.375 9.1945Z"
+      fill="#313131"
+    />
+    <path
+      d="M23.0156 12.8137C23.1708 12.5702 23.2529 12.2872 23.252 11.9984C23.2512 11.7096 23.1675 11.4271 23.0109 11.1844C21.7706 9.26625 20.1614 7.63688 18.3577 6.47203C16.3594 5.18203 14.1562 4.5 11.985 4.5C10.8404 4.50157 9.7035 4.6882 8.61843 5.05266C8.58807 5.06276 8.56079 5.08046 8.5392 5.10409C8.51761 5.12772 8.50242 5.15647 8.49509 5.18763C8.48776 5.21878 8.48853 5.25129 8.49732 5.28207C8.50611 5.31284 8.52263 5.34085 8.54531 5.36344L10.7597 7.57781C10.7827 7.60086 10.8113 7.61752 10.8427 7.62615C10.8741 7.63478 10.9072 7.63508 10.9387 7.62703C11.6893 7.44412 12.4744 7.45752 13.2183 7.66595C13.9622 7.87438 14.6399 8.27082 15.1862 8.8171C15.7325 9.36338 16.1289 10.0411 16.3373 10.785C16.5458 11.5289 16.5592 12.3139 16.3762 13.0645C16.3683 13.096 16.3686 13.129 16.3773 13.1603C16.3859 13.1916 16.4025 13.2202 16.4255 13.2431L19.6106 16.4306C19.6438 16.4638 19.6881 16.4834 19.735 16.4855C19.7819 16.4876 19.8278 16.472 19.8637 16.4419C21.0898 15.3968 22.1522 14.1739 23.0156 12.8137ZM12 16.5C11.3188 16.5 10.6465 16.3454 10.0337 16.0478C9.42094 15.7502 8.88375 15.3173 8.46263 14.7819C8.04151 14.2464 7.74745 13.6223 7.60262 12.9567C7.45779 12.2911 7.46598 11.6012 7.62656 10.9392C7.63452 10.9077 7.63417 10.8747 7.62555 10.8434C7.61692 10.8121 7.60031 10.7836 7.57734 10.7606L4.44422 7.62609C4.41099 7.59283 4.36649 7.57327 4.31952 7.57127C4.27255 7.56927 4.22655 7.58499 4.19062 7.61531C3.04734 8.59078 1.9875 9.77766 1.01859 11.1647C0.84899 11.4081 0.755584 11.6965 0.750243 11.9931C0.744901 12.2897 0.827865 12.5813 0.988591 12.8306C2.22656 14.768 3.81937 16.3997 5.59547 17.5486C7.59656 18.8438 9.74625 19.5 11.985 19.5C13.1412 19.4969 14.2899 19.3143 15.39 18.9586C15.4206 18.9488 15.4482 18.9313 15.4702 18.9078C15.4921 18.8842 15.5076 18.8554 15.5152 18.8242C15.5227 18.7929 15.5222 18.7602 15.5134 18.7293C15.5047 18.6983 15.4882 18.6701 15.4655 18.6473L13.2403 16.4227C13.2174 16.3997 13.1888 16.3831 13.1575 16.3744C13.1262 16.3658 13.0932 16.3655 13.0617 16.3734C12.7141 16.4577 12.3577 16.5002 12 16.5Z"
+      fill="#313131"
+    />
+  </svg>
+);
+
+const INVITE_ERROR_MESSAGES = {
+  "Invitations.InvalidToken": "This invitation link is invalid or has expired.",
+  "Invitations.AlreadyAccepted": "This invitation has already been used.",
+  "Invitations.Expired":
+    "This invitation link has expired. Please ask for a new one.",
+  "Invitations.Revoked": "This invitation has been cancelled.",
+};
+
+function parseError(err) {
+  const code = err?.errors?.[0]?.code || err?.code;
+  return INVITE_ERROR_MESSAGES[code] || err?.message || "Something went wrong.";
+}
+
+// Password strength checker
+function getPasswordStrength(pw) {
+  if (!pw) return null;
+  let score = 0;
+  if (pw.length >= 8) score++;
+  if (/[A-Z]/.test(pw)) score++;
+  if (/[a-z]/.test(pw)) score++;
+  if (/[0-9]/.test(pw)) score++;
+  if (/[^A-Za-z0-9]/.test(pw)) score++;
+  if (score <= 2) return { label: "Weak", color: "#e53e3e", width: "33%" };
+  if (score === 3 || score === 4)
+    return { label: "Good", color: "#d69e2e", width: "66%" };
+  return { label: "Strong", color: "#38a169", width: "100%" };
+}
 
 export default function JoinOrganization() {
+  const { token } = useParams(); // Route: /join/:token
+  const navigate = useNavigate();
+
+  // Invitation metadata fetched from server
+  const [invitation, setInvitation] = useState(null);
+  const [fetchStatus, setFetchStatus] = useState("loading"); // loading | ok | error
+
+  // Form fields
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Submission state
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  const strength = getPasswordStrength(password);
+
+  // ── Fetch invitation details on mount ──────────────────────────────────────
+  useEffect(() => {
+    if (!token) {
+      setFetchStatus("error");
+      setError("No invitation token found in the URL.");
+      return;
+    }
+
+    (async () => {
+      try {
+        const { data } = await api.get(`/invitations/${token}`);
+        setInvitation(data);
+        setFetchStatus("ok");
+      } catch (err) {
+        setFetchStatus("error");
+        setError(parseError(err?.response?.data || err));
+      }
+    })();
+  }, [token]);
+
+  // ── Client-side validation ─────────────────────────────────────────────────
+  function validate() {
+    const errs = {};
+    if (!firstName.trim()) errs.firstName = "First name is required.";
+    if (!lastName.trim()) errs.lastName = "Last name is required.";
+    if (!password) errs.password = "Password is required.";
+    else if (password.length < 8)
+      errs.password = "Password must be at least 8 characters.";
+    else if (!/[A-Z]/.test(password))
+      errs.password = "Include at least one uppercase letter.";
+    else if (!/[a-z]/.test(password))
+      errs.password = "Include at least one lowercase letter.";
+    else if (!/[0-9]/.test(password))
+      errs.password = "Include at least one number.";
+    else if (!/[^A-Za-z0-9]/.test(password))
+      errs.password = "Include at least one special character.";
+    return errs;
+  }
+
+  // ── Accept invitation ──────────────────────────────────────────────────────
+  const handleAccept = async () => {
+    setError("");
+    const errs = validate();
+    if (Object.keys(errs).length) {
+      setFieldErrors(errs);
+      return;
+    }
+    setFieldErrors({});
+    setLoading(true);
+
+    try {
+      await api.post(`/invitations/${token}/accept`, {
+        firstName: firstName.trim(),
+        lastName: lastName.trim(),
+        password,
+      });
+
+      // Accepted — tell user to verify email then log in
+      navigate("/check-email", { state: { fromInvite: true } });
+    } catch (err) {
+      setError(parseError(err?.response?.data || err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ── Decline invitation ─────────────────────────────────────────────────────
+  const handleDecline = async () => {
+    if (!window.confirm("Are you sure you want to decline this invitation?"))
+      return;
+    setLoading(true);
+    try {
+      await api.post(`/invitations/${token}/decline`);
+      navigate("/login");
+    } catch {
+      // Even on error, redirect — the invite is unusable either way
+      navigate("/login");
+    }
+  };
+
+  // ── Loading skeleton ───────────────────────────────────────────────────────
+  if (fetchStatus === "loading") {
+    return (
+      <main>
+        <div className={styles.page}>
+          <div className={styles.leftPanel}>
+            <Logo />
+            <div className={styles.formCard}>
+              <div
+                className={styles.skeleton}
+                style={{ width: "60%", height: 28, marginBottom: 12 }}
+              />
+              <div
+                className={styles.skeleton}
+                style={{ width: "80%", height: 18, marginBottom: 32 }}
+              />
+              <div
+                className={styles.skeleton}
+                style={{ height: 48, marginBottom: 12 }}
+              />
+              <div
+                className={styles.skeleton}
+                style={{ height: 48, marginBottom: 12 }}
+              />
+              <div className={styles.skeleton} style={{ height: 48 }} />
+            </div>
+          </div>
+          <div className={styles.rightPanel}>
+            <div className={styles.heroImageWrap}>
+              <img src={verifyImage} alt="Verification" />
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // ── Invalid / expired token screen ────────────────────────────────────────
+  if (fetchStatus === "error") {
+    return (
+      <main>
+        <div className={styles.page}>
+          <div className={styles.leftPanel}>
+            <Logo />
+            <div className={styles.formCard}>
+              <div className={styles.invalidCard}>
+                <div className={styles.invalidIcon}>
+                  <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+                    <circle cx="24" cy="24" r="24" fill="#fff5f5" />
+                    <path
+                      d="M16 16l16 16M32 16L16 32"
+                      stroke="#e53e3e"
+                      strokeWidth="3"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </div>
+                <h1 className={styles.formTitle}>Invalid Invitation</h1>
+                <p className={styles.formSubtitle}>{error}</p>
+                <button
+                  type="button"
+                  className={styles.btnAccept}
+                  onClick={() => navigate("/login")}
+                >
+                  Back to Login
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className={styles.rightPanel}>
+            <div className={styles.heroImageWrap}>
+              <img src={verifyImage} alt="Verification" />
+            </div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  // ── Main form ──────────────────────────────────────────────────────────────
   return (
     <main>
       <div className={styles.page}>
         {/* LEFT PANEL */}
         <div className={styles.leftPanel}>
-          {/* HEADER */}
           <header className={styles.header}>
-            {/* <div className={styles.logo}>
-              <svg
-                width="39"
-                height="53"
-                viewBox="0 0 39 53"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  d="M29.8865 43.0497L27.0449 45.5729V37.4788C27.0449 37.1731 26.8972 36.8852 26.6475 36.7082L20.4142 32.2555V18.1751L23.1832 16.7919C24.8886 18.5279 28.0486 17.2135 27.9925 14.749C27.8499 10.7675 21.9668 11.1331 22.3451 15.0929L19.0451 16.7435C18.7241 16.904 18.5216 17.2314 18.5216 17.5905V32.7446C18.5216 33.049 18.6693 33.3368 18.919 33.5151L25.1523 37.9666V47.2554L22.3107 49.7785V38.4264C22.3107 37.9042 21.8866 37.48 21.3631 37.48H15.6813V33.4285C17.3333 32.5255 16.6429 29.8674 14.7337 29.903C12.8245 29.8674 12.1342 32.5268 13.7861 33.4285V38.4264C13.7861 38.9498 14.2102 39.374 14.7337 39.374H20.4168V51.4597L19.4692 52.3003L16.6276 49.7772V44.1082C16.6837 43.5719 15.9144 43.051 15.6125 42.7008C15.6507 42.5505 15.6762 42.39 15.6813 42.2142C15.6176 39.7166 11.9559 39.7153 11.8922 42.2142C11.9291 43.6764 13.199 44.2763 14.2586 44.0254L14.7337 44.5004V48.096C14.3593 47.7406 6.34411 40.7088 6.34411 40.5776L11.6158 35.3059C11.7928 35.1288 11.8934 34.8881 11.8934 34.6359V29.4267L15.303 26.8692C15.5412 26.6908 15.6813 26.4106 15.6813 26.1113V24.0442C18.6451 22.987 17.9179 18.5611 14.735 18.5356C11.5521 18.5611 10.8236 22.987 13.7874 24.0442V25.6388L10.3778 28.1963C10.1396 28.3746 9.99951 28.6548 9.99951 28.9541V34.2449L5.12903 39.1154C3.55861 36.9973 2.65304 34.4372 2.39958 31.7957H4.52404L4.71127 32.5446C3.74711 33.7125 4.68071 35.6319 6.21037 35.5835C8.53608 35.5619 8.76916 32.1663 6.48294 31.8224C6.27023 31.1385 6.25877 29.8826 5.26404 29.9005H2.14612L1.76784 27.0589H7.15798C7.68145 27.0589 8.10558 26.6348 8.10558 26.1113V20.0971L16.0672 16.5589C17.1932 16.0367 16.4455 14.3402 15.2967 14.828L6.77333 18.6158C6.43072 18.7687 6.21037 19.1075 6.21037 19.4806V25.1637H1.51566L0.999824 21.2969L2.88484 19.4119C5.64996 20.0232 6.20018 15.8278 3.37011 15.6928C2.14994 15.6737 1.20106 16.8989 1.54622 18.072L0.68523 18.933L0 13.7988H12.8411C13.3645 13.7988 13.7874 13.3747 13.7874 12.8512V8.11577C13.767 6.87268 11.9138 6.87013 11.8934 8.11577V11.9049H2.88866C6.81791 9.90144 10.6121 7.41908 14.3389 4.42979L16.6289 7.48531V12.8512C16.6493 14.0943 18.5025 14.0982 18.5229 12.8512V7.16944C18.5229 6.96438 18.4566 6.76441 18.3331 6.60139L15.8049 3.22746C17.0148 2.20853 18.2184 1.13101 19.4182 0C20.8104 1.55259 22.27 3.00202 23.7984 4.34318L20.6944 7.4471C20.5174 7.62414 20.4168 7.86486 20.4168 8.11577V10.9573C20.4384 12.2017 22.2903 12.2029 22.312 10.9573V8.50806L25.2465 5.57227C26.4387 6.53898 27.6741 7.43309 28.9414 8.2737V17.8516L23.9066 19.5303C23.5207 19.659 23.2596 20.0207 23.2596 20.4283V28.9516C23.2596 29.2917 23.4417 29.6063 23.7372 29.7744L29.889 33.291V43.0485L29.8865 43.0497Z"
-                  fill="#3D42DF"
-                />
-              </svg>
-
-              <h3>Trap-intell</h3>
-            </div> */}
             <Logo />
           </header>
 
@@ -36,57 +250,184 @@ export default function JoinOrganization() {
           <div className={styles.formCard}>
             <div className={styles.formHeader}>
               <h1 className={styles.formTitle}>Join Organization</h1>
-
               <p className={styles.formSubtitle}>
-                You have been invited to join Acme Corp.
+                You've been invited to join{" "}
+                <strong>
+                  {invitation?.organizationName ?? "your organization"}
+                </strong>
+                .
               </p>
             </div>
 
-            <form className={styles.formGrid}>
+            {/* Invitation metadata chips */}
+            <div className={styles.inviteMeta}>
+              {invitation?.role && (
+                <span className={styles.chip}>
+                  Role: <strong>{invitation.role}</strong>
+                </span>
+              )}
+              {invitation?.invitedBy && (
+                <span className={styles.chip}>
+                  Invited by: <strong>{invitation.invitedBy}</strong>
+                </span>
+              )}
+              {invitation?.email && (
+                <span className={styles.chip}>
+                  For: <strong>{invitation.email}</strong>
+                </span>
+              )}
+            </div>
+
+            {/* API error banner */}
+            {error && fetchStatus !== "error" && (
+              <div className={styles.errorBanner} role="alert">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                  <circle
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="#e53e3e"
+                    strokeWidth="2"
+                  />
+                  <path
+                    d="M12 8v4M12 16h.01"
+                    stroke="#e53e3e"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  />
+                </svg>
+                {error}
+              </div>
+            )}
+
+            <div className={styles.formGrid}>
+              {/* First + Last Name */}
               <div className={styles.formRow}>
                 <div className={styles.fieldWrap}>
                   <label htmlFor="firstName">First Name</label>
-
                   <input
                     type="text"
                     id="firstName"
                     placeholder="Enter your first name"
+                    value={firstName}
+                    onChange={(e) => {
+                      setFirstName(e.target.value);
+                      setFieldErrors((p) => ({ ...p, firstName: "" }));
+                    }}
+                    disabled={loading}
                   />
+                  {fieldErrors.firstName && (
+                    <span className={styles.fieldError}>
+                      {fieldErrors.firstName}
+                    </span>
+                  )}
                 </div>
 
                 <div className={styles.fieldWrap}>
                   <label htmlFor="lastName">Last Name</label>
-
                   <input
                     type="text"
                     id="lastName"
                     placeholder="Enter your last name"
+                    value={lastName}
+                    onChange={(e) => {
+                      setLastName(e.target.value);
+                      setFieldErrors((p) => ({ ...p, lastName: "" }));
+                    }}
+                    disabled={loading}
                   />
+                  {fieldErrors.lastName && (
+                    <span className={styles.fieldError}>
+                      {fieldErrors.lastName}
+                    </span>
+                  )}
                 </div>
               </div>
 
+              {/* Password */}
               <div className={styles.pwRow}>
                 <div className={`${styles.fieldWrap} ${styles.pwWrap}`}>
-                  <label htmlFor="password">Confirm Password</label>
-
+                  <label htmlFor="password">Password</label>
                   <input
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     id="password"
-                    placeholder="Enter your password"
+                    placeholder="Create a password"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setFieldErrors((p) => ({ ...p, password: "" }));
+                    }}
+                    disabled={loading}
                   />
+                  <span
+                    className={styles.eyeToggle}
+                    onClick={() => setShowPassword(!showPassword)}
+                    role="button"
+                    aria-label={
+                      showPassword ? "Hide password" : "Show password"
+                    }
+                  >
+                    <EyeIcon />
+                  </span>
+                  {fieldErrors.password && (
+                    <span className={styles.fieldError}>
+                      {fieldErrors.password}
+                    </span>
+                  )}
+                  {/* Strength meter */}
+                  {strength && !fieldErrors.password && (
+                    <div className={styles.strengthWrap}>
+                      <div className={styles.strengthBar}>
+                        <div
+                          className={styles.strengthFill}
+                          style={{
+                            width: strength.width,
+                            background: strength.color,
+                          }}
+                        />
+                      </div>
+                      <span
+                        className={styles.strengthLabel}
+                        style={{ color: strength.color }}
+                      >
+                        {strength.label}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 
+              {/* Password rules hint */}
+              <p className={styles.pwHint}>
+                Min 8 chars · 1 uppercase · 1 lowercase · 1 number · 1 special
+                character
+              </p>
+
+              {/* Buttons */}
               <div className={styles.btnRow}>
-                <button type="button" className={styles.btnDecline}>
-                  Decline Invitation
+                <button
+                  type="button"
+                  className={styles.btnDecline}
+                  onClick={handleDecline}
+                  disabled={loading}
+                >
+                  Decline
                 </button>
 
-                <button type="submit" className={styles.btnAccept}>
-                  Accept Invitation →
+                <button
+                  type="button"
+                  className={styles.btnAccept}
+                  onClick={handleAccept}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <span className={styles.spinner} aria-label="Processing…" />
+                  ) : (
+                    "Accept Invitation →"
+                  )}
                 </button>
               </div>
-            </form>
+            </div>
           </div>
         </div>
 
