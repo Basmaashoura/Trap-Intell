@@ -1,0 +1,370 @@
+/* =========================================
+   Honeypots.module.css — Trap-Intell
+   ========================================= */
+
+/* ── Deploy Button ── */
+.btnDeploy {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 22px;
+  background: var(--clr-blue-purple);
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 0.87rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 18px rgba(64, 68, 228, 0.35);
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
+  white-space: nowrap;
+}
+
+.btnDeploy:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(64, 68, 228, 0.45);
+}
+
+.btnDeploy svg {
+  flex-shrink: 0;
+}
+
+/* ─────────────────────────────────
+   Stats Grid
+───────────────────────────────── */
+
+.honeypotStats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+/* ─────────────────────────────────
+   Search
+───────────────────────────────── */
+
+.honeypotSearchWrap {
+  margin-top: 24px;
+  margin-bottom: 20px; /* add this */
+  position: relative;
+  width: 100%;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #aab0c6;
+  pointer-events: none;
+}
+
+.honeypotSearchInput {
+  width: 100%;
+  background: white;
+  border: 1.5px solid #e8eaf0;
+  border-radius: 12px;
+  padding: 13px 50px 13px 44px;
+  font-size: 0.88rem;
+  color: var(--clr-dark-navy);
+  outline: none;
+}
+
+.honeypotSearchInput:focus {
+  border-color: var(--clr-blue-purple);
+  box-shadow: 0 0 0 3px var(--clr-blue-purple-10);
+}
+
+.searchFilterBtn {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* ─────────────────────────────────
+   Search 
+───────────────────────────────── */
+
+.searchFilterBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--clr-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 6px;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.searchFilterBtn:hover {
+  background: var(--clr-blue-purple-10);
+  color: var(--clr-blue-purple);
+}
+
+/* ─────────────────────────────────
+   Honeypots Grid
+───────────────────────────────── */
+
+.honeypotsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+/* ─────────────────────────────────
+   Honeypot Card
+───────────────────────────────── */
+
+.honeypotCard {
+  background: #fff;
+  border: 1.5px solid #e8eaf0;
+  border-radius: 16px;
+  padding: 20px 20px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  transition:
+    box-shadow 0.2s,
+    transform 0.2s,
+    border-color 0.2s;
+  animation: riseUp 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.honeypotCard:hover {
+  box-shadow: 0 8px 32px rgba(64, 68, 228, 0.1);
+  transform: translateY(-3px);
+  border-color: rgba(64, 68, 228, 0.2);
+}
+
+/* ─────────────────────────────────
+   Card Header
+───────────────────────────────── */
+
+.honeypotCardTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.honeypotName {
+  font-size: 0.97rem;
+  font-weight: 700;
+  color: var(--clr-dark-navy);
+  letter-spacing: -0.2px;
+  line-height: 1.2;
+}
+
+/* ─────────────────────────────────
+   Status Badge
+───────────────────────────────── */
+
+.badgeStatus {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.badgeActive {
+  background: rgba(42, 206, 95, 0.08);
+  color: #1a8a40;
+  border: 1px solid rgba(42, 206, 95, 0.3);
+}
+
+.badgeInactive {
+  background: rgba(231, 76, 60, 0.08);
+  color: #b03a2e;
+  border: 1px solid rgba(231, 76, 60, 0.25);
+}
+
+.badgeWarning {
+  background: rgba(243, 156, 18, 0.1);
+  color: #b7770d;
+  border: 1px solid rgba(243, 156, 18, 0.3);
+}
+
+/* ─────────────────────────────────
+   Type & Divider
+───────────────────────────────── */
+
+.honeypotType {
+  font-size: 0.78rem;
+  color: var(--clr-text-muted);
+  font-weight: 500;
+  margin-top: -8px;
+}
+
+.honeypotDivider {
+  height: 1px;
+  background: #f0f1f7;
+  margin: -2px 0;
+}
+
+/* ─────────────────────────────────
+   Metadata
+───────────────────────────────── */
+
+.honeypotMeta {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.metaItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.metaLabel {
+  font-size: 0.67rem;
+  font-weight: 700;
+  color: #aab0c6;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.metaValue {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--clr-dark-navy);
+  letter-spacing: -0.2px;
+}
+
+/* ─────────────────────────────────
+   View Logs Button
+───────────────────────────────── */
+
+.btnViewLogs {
+  width: 100%;
+  padding: 11px 16px;
+  background: var(--clr-blue-purple);
+  color: #fff;
+  border: none;
+  border-radius: 50px;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    opacity 0.18s,
+    transform 0.15s,
+    box-shadow 0.15s;
+  box-shadow: 0 4px 14px rgba(64, 68, 228, 0.25);
+}
+
+.btnViewLogs:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(64, 68, 228, 0.35);
+}
+
+.btnViewLogs:active {
+  transform: translateY(0);
+}
+
+/* ─────────────────────────────────
+   Floating Action Button
+───────────────────────────────── */
+
+.fab {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--clr-blue-purple);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-shadow: 0 8px 28px rgba(64, 68, 228, 0.4);
+
+  transition:
+    transform 0.18s,
+    box-shadow 0.18s;
+
+  z-index: 99;
+}
+
+.fab:hover {
+  transform: scale(1.08);
+  box-shadow: 0 12px 36px rgba(64, 68, 228, 0.5);
+}
+
+/* ─────────────────────────────────
+   Animations
+───────────────────────────────── */
+
+@keyframes riseUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─────────────────────────────────
+   Responsive
+───────────────────────────────── */
+
+@media (max-width: 1100px) {
+  .honeypotsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .honeypotStats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .honeypotsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .honeypotStats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 540px) {
+  .honeypotsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .honeypotStats {
+    grid-template-columns: 1fr;
+  }
+
+  .fab {
+    width: 50px;
+    height: 50px;
+    bottom: 20px;
+    right: 20px;
+  }
+}

@@ -41,7 +41,7 @@ const SOURCE_IPS = [
   "198.51.100.23",
 ];
 const STATUSES = ["Blocked", "Blocked", "Blocked", "Detected", "Contained"];
-const SEVERITIES = ["DB-01", "DB-02", "WEB-03"];
+const SEVERITIES = ["Low", "Medium", "High", "Critical"];
 
 const ACTORS = [
   {
@@ -77,15 +77,39 @@ const randTime = () => {
   const m = String(Math.floor(Math.random() * 60)).padStart(2, "0");
   return `${h}:${m}`;
 };
-const makeEvent = () => ({
-  id: randId(),
-  status: randItem(STATUSES),
-  severity: randItem(SEVERITIES),
-  attackType: randItem(ATTACK_TYPES),
-  targetTrap: randItem(TARGET_TRAPS),
-  sourceIP: randItem(SOURCE_IPS),
-  time: randTime(),
-});
+
+const STATIC_EVENTS = [
+  {
+    id: "ATK-001",
+    status: "Blocked",
+    severity: "High",
+    attackType: "BruteForce",
+    targetTrap: "SSH-Honeypot-DMZ-01",
+    sourceIP: "185.220.101.42",
+    country: "Russia",
+    time: "07:19",
+  },
+  {
+    id: "ATK-002",
+    status: "Detected",
+    severity: "Low",
+    attackType: "Reconnaissance",
+    targetTrap: "HTTP-Honeypot-Web-01",
+    sourceIP: "23.45.67.89",
+    country: "United States",
+    time: "21:19",
+  },
+  {
+    id: "ATK-003",
+    status: "Blocked",
+    severity: "High",
+    attackType: "LateralMovement",
+    targetTrap: "SMB-Honeypot-Internal-01",
+    sourceIP: "185.56.89.123",
+    country: "Ukraine",
+    time: "01:19",
+  },
+];
 
 const STATUS_CLASS = {
   Blocked: styles.blocked,
@@ -97,24 +121,11 @@ const STATUS_CLASS = {
 export default function AttacksPage() {
   const [period, setPeriod] = useState("quarterly");
   const [liveFeed, setLiveFeed] = useState(true);
-  const [events, setEvents] = useState(() =>
-    Array.from({ length: 48 }, makeEvent),
-  );
+  const [events, setEvents] = useState(STATIC_EVENTS);
+
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
   const liveRef = useRef(null);
-
-  /* live feed */
-  useEffect(() => {
-    if (!liveFeed) {
-      clearInterval(liveRef.current);
-      return;
-    }
-    liveRef.current = setInterval(() => {
-      setEvents((prev) => [makeEvent(), ...prev]);
-    }, 5000);
-    return () => clearInterval(liveRef.current);
-  }, [liveFeed]);
 
   /* reset page on search */
   useEffect(() => {
@@ -159,7 +170,7 @@ export default function AttacksPage() {
           <h1>Attack Analysis</h1>
           <p>Real-time inspection of incoming threats and signatures.</p>
         </div>
-        <button
+        {/* <button
           className={styles.btnLiveFeed}
           onClick={() => setLiveFeed((f) => !f)}
         >
@@ -174,7 +185,7 @@ export default function AttacksPage() {
               Live Feed Off
             </>
           )}
-        </button>
+        </button> */}
       </div>
 
       {/* search */}

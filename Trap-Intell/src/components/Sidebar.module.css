@@ -41,7 +41,9 @@
   font-weight: 500;
   color: rgba(255, 255, 255, 0.55);
   text-decoration: none;
-  transition: background 0.15s, color 0.15s;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
 .navItem:hover {
@@ -73,7 +75,9 @@
   cursor: pointer;
   transition: opacity 0.2s;
 }
-.btnUpgrade:hover { opacity: 0.88; }
+.btnUpgrade:hover {
+  opacity: 0.88;
+}
 
 /* user */
 .user {
@@ -133,4 +137,67 @@
     transform: translateX(0);
     box-shadow: 4px 0 24px rgba(0, 0, 0, 0.4);
   }
+}
+
+.navIcon {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.navItem {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.navItem.active .navIcon {
+  opacity: 1;
+}
+
+.userSection {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.user {
+  flex: 1;
+  min-width: 0;
+}
+
+.roleTag {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.btnLogout {
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.btnLogout:hover {
+  background: rgba(229, 62, 62, 0.15);
+  color: #e74c3c;
+  border-color: rgba(229, 62, 62, 0.3);
 }
