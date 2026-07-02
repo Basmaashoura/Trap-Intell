@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import styles from "./Header.module.css";
 import Button from "./Button";
 import Logo from "./Logo";
+import { Link } from "react-router-dom";
 
 function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -56,9 +57,9 @@ function Header() {
               <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
             </svg>
           </button>
-          <a href="login.html" className={styles.btnTerminal}>
+          <Link to="/login" className={styles.btnTerminal}>
             Access Terminal
-          </a>
+          </Link>
         </div>
         {/* <!-- Hamburger --> */}
         {/* <Button className="nav-hamburger" id="hamburger" aria-label="Menu"> </Button>*/}

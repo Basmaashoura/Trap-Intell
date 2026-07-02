@@ -13,7 +13,43 @@ function timeAgo(dateStr) {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
+// ── Numeric enum maps ──────────────────────────────────────────
+const ACTION_MAP = {
+  0: "View",
+  1: "Create",
+  2: "Update",
+  3: "Delete",
+  4: "Login",
+  5: "Logout",
+  6: "Export",
+  7: "Import",
+  8: "Approve",
+  9: "Reject",
+  View: "View",
+  Create: "Create",
+  Update: "Update",
+  Delete: "Delete",
+};
+const SEVERITY_MAP = {
+  0: "Info",
+  1: "Warning",
+  2: "Error",
+  3: "Critical",
+  Info: "Info",
+  Warning: "Warning",
+  Error: "Error",
+  Critical: "Critical",
+};
+function resolveAction(v) {
+  return ACTION_MAP[v] ?? String(v ?? "—");
+}
+function resolveSeverity(v) {
+  return SEVERITY_MAP[v] ?? String(v ?? "—");
+}
+
+// ── Badges ─────────────────────────────────────────────────────
 function SeverityBadge({ severity }) {
+  const s = resolveSeverity(severity);
   const cfg = {
     Info: {
       bg: "rgba(52,152,219,0.08)",
@@ -39,41 +75,12 @@ function SeverityBadge({ severity }) {
       border: "rgba(231,76,60,0.35)",
       dot: "#c0392b",
     },
-  }[severity] ?? {
+  }[s] ?? {
     bg: "#f4f5fa",
     color: "#aab0c6",
     border: "#e8eaf0",
     dot: "#aab0c6",
   };
-
-  const ACTION_MAP = {
-    0: "View",
-    1: "Create",
-    2: "Update",
-    3: "Delete",
-    View: "View",
-    Create: "Create",
-    Update: "Update",
-    Delete: "Delete",
-  };
-
-  const SEVERITY_MAP = {
-    0: "Info",
-    1: "Warning",
-    2: "Error",
-    3: "Critical",
-    Info: "Info",
-    Warning: "Warning",
-    Error: "Error",
-    Critical: "Critical",
-  };
-
-  function resolveAction(val) {
-    return ACTION_MAP[val] ?? String(val);
-  }
-  function resolveSeverity(val) {
-    return SEVERITY_MAP[val] ?? String(val);
-  }
 
   return (
     <span
@@ -101,12 +108,13 @@ function SeverityBadge({ severity }) {
           flexShrink: 0,
         }}
       />
-      {severity}
+      {s}
     </span>
   );
 }
 
 function ActionBadge({ action }) {
+  const a = resolveAction(action);
   const cfg = {
     Create: {
       color: "#1a8a40",
@@ -128,7 +136,22 @@ function ActionBadge({ action }) {
       bg: "rgba(107,114,128,0.08)",
       border: "rgba(107,114,128,0.2)",
     },
-  }[action] ?? { color: "#6b7280", bg: "#f4f5fa", border: "#e8eaf0" };
+    Login: {
+      color: "#4044e4",
+      bg: "rgba(64,68,228,0.08)",
+      border: "rgba(64,68,228,0.2)",
+    },
+    Logout: {
+      color: "#8a1bfa",
+      bg: "rgba(138,27,250,0.08)",
+      border: "rgba(138,27,250,0.2)",
+    },
+    Export: {
+      color: "#0891b2",
+      bg: "rgba(8,145,178,0.08)",
+      border: "rgba(8,145,178,0.2)",
+    },
+  }[a] ?? { color: "#6b7280", bg: "#f4f5fa", border: "#e8eaf0" };
 
   return (
     <span
@@ -144,7 +167,7 @@ function ActionBadge({ action }) {
         border: `1px solid ${cfg.border}`,
       }}
     >
-      {action}
+      {a}
     </span>
   );
 }
@@ -171,38 +194,35 @@ const PAGE_SIZE = 20;
 export default function ReportsPage() {
   const { orgId } = useAuth();
 
-  // ── Data state ─────────────────────────────────────────────
   const [logs, setLogs] = useState(null);
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
-
-  // ── Filters ────────────────────────────────────────────────
   const [search, setSearch] = useState("");
-  const [severityFilter, setSeverityFilter] = useState("all");
-  const [actionFilter, setActionFilter] = useState("all");
-
-  // ── Detail panel ───────────────────────────────────────────
+  const [sevFilter, setSevFilter] = useState("all");
+  const [actFilter, setActFilter] = useState("all");
   const [selected, setSelected] = useState(null);
 
-  // ── Fetch logs ─────────────────────────────────────────────
-  const loadLogs = useCallback(async () => {
+  // ── Fetch ──────────────────────────────────────────────────
+  const load = useCallback(async () => {
     if (!orgId) return;
     setLoading(true);
     setError(null);
     try {
-      const [logsData, summaryData] = await Promise.allSettled([
+      const [logsRes, summaryRes] = await Promise.allSettled([
         api.get(`/api/organizations/${orgId}/auditlogs`, {
           pageNumber: page,
           pageSize: PAGE_SIZE,
         }),
-        api.get(`/api/organizations/${orgId}/auditlogs/summary`),
+        // Dashboard owner already has auditing summary — use it
+        // But also try the dedicated endpoint
+        api.get(`/api/organizations/${orgId}/auditlogs/dashboard`),
       ]);
 
-      if (logsData.status === "fulfilled" && logsData.value) {
-        const d = logsData.value;
+      if (logsRes.status === "fulfilled" && logsRes.value) {
+        const d = logsRes.value;
         const items = Array.isArray(d) ? d : (d.items ?? d.data ?? []);
         setLogs(items);
         setTotalCount(d.totalCount ?? d.total ?? items.length);
@@ -210,8 +230,8 @@ export default function ReportsPage() {
         setLogs([]);
       }
 
-      if (summaryData.status === "fulfilled" && summaryData.value) {
-        setSummary(summaryData.value);
+      if (summaryRes.status === "fulfilled" && summaryRes.value) {
+        setSummary(summaryRes.value);
       }
     } catch (err) {
       setError(err.message ?? "Failed to load audit logs");
@@ -222,8 +242,11 @@ export default function ReportsPage() {
   }, [orgId, page]);
 
   useEffect(() => {
-    loadLogs();
-  }, [loadLogs]);
+    load();
+  }, [load]);
+  useEffect(() => {
+    setPage(1);
+  }, [search, sevFilter, actFilter]);
 
   // ── Acknowledge ────────────────────────────────────────────
   const acknowledge = async (log) => {
@@ -235,7 +258,7 @@ export default function ReportsPage() {
         prev.map((l) => (l.id === log.id ? { ...l, isAcknowledged: true } : l)),
       );
       if (selected?.id === log.id)
-        setSelected((prev) => ({ ...prev, isAcknowledged: true }));
+        setSelected((p) => ({ ...p, isAcknowledged: true }));
     } catch (err) {
       console.error("Acknowledge failed:", err.message);
     }
@@ -253,21 +276,51 @@ export default function ReportsPage() {
     }
   };
 
-  // ── Client-side filter (on top of server pagination) ──────
+  // ── Client-side filter ─────────────────────────────────────
   const filtered = (logs ?? []).filter((log) => {
-    const matchSeverity =
-      severityFilter === "all" || log.severity === severityFilter;
-    const matchAction = actionFilter === "all" || log.action === actionFilter;
-    const matchSearch =
+    const sev = resolveSeverity(log.severity).toLowerCase();
+    const act = resolveAction(log.action).toLowerCase();
+    const matchSev = sevFilter === "all" || sev === sevFilter.toLowerCase();
+    const matchAct = actFilter === "all" || act === actFilter.toLowerCase();
+    const matchQ =
       !search ||
-      log.reason?.toLowerCase().includes(search.toLowerCase()) ||
-      log.resourceType?.toLowerCase().includes(search.toLowerCase()) ||
-      log.action?.toLowerCase().includes(search.toLowerCase()) ||
-      log.ipAddress?.toLowerCase().includes(search.toLowerCase());
-    return matchSeverity && matchAction && matchSearch;
+      (log.reason ?? "").toLowerCase().includes(search.toLowerCase()) ||
+      (log.resourceType ?? "").toLowerCase().includes(search.toLowerCase()) ||
+      act.includes(search.toLowerCase()) ||
+      (log.ipAddress ?? "").toLowerCase().includes(search.toLowerCase());
+    return matchSev && matchAct && matchQ;
   });
 
   const totalPages = Math.ceil(totalCount / PAGE_SIZE);
+
+  // ── Summary values — dashboard/owner has auditing nested ──
+  // auditing: { totalEvents, unacknowledgedCriticalEvents, highSeverityEvents }
+  const summaryCards = [
+    {
+      label: "Total Logs",
+      value: totalCount || summary?.totalCount || summary?.totalEvents || "—",
+      color: "#4044e4",
+    },
+    {
+      label: "Critical",
+      value:
+        summary?.criticalCount ?? summary?.unacknowledgedCriticalEvents ?? "—",
+      color: "#e74c3c",
+    },
+    {
+      label: "High Severity",
+      value: summary?.warningCount ?? summary?.highSeverityEvents ?? "—",
+      color: "#f39c12",
+    },
+    {
+      label: "Unacknowledged",
+      value:
+        summary?.unacknowledgedCount ??
+        summary?.unacknowledgedCriticalEvents ??
+        "—",
+      color: "#8a1bfa",
+    },
+  ];
 
   return (
     <div>
@@ -303,7 +356,7 @@ export default function ReportsPage() {
             ↓ Export CSV
           </button>
           <button
-            onClick={loadLogs}
+            onClick={load}
             style={{
               padding: "10px 20px",
               background: "#4044e4",
@@ -320,7 +373,7 @@ export default function ReportsPage() {
         </div>
       </div>
 
-      {/* Summary KPI cards */}
+      {/* KPI cards */}
       <div
         style={{
           display: "grid",
@@ -329,28 +382,7 @@ export default function ReportsPage() {
           marginBottom: 24,
         }}
       >
-        {[
-          {
-            label: "Total Logs",
-            value: summary?.totalCount ?? totalCount ?? "—",
-            color: "#4044e4",
-          },
-          {
-            label: "Critical",
-            value: summary?.criticalCount ?? "—",
-            color: "#e74c3c",
-          },
-          {
-            label: "Warnings",
-            value: summary?.warningCount ?? "—",
-            color: "#f39c12",
-          },
-          {
-            label: "Unacknowledged",
-            value: summary?.unacknowledgedCount ?? "—",
-            color: "#8a1bfa",
-          },
-        ].map((s) => (
+        {summaryCards.map((s) => (
           <div
             key={s.label}
             style={{
@@ -380,7 +412,7 @@ export default function ReportsPage() {
                 letterSpacing: "-0.5px",
               }}
             >
-              {s.value}
+              {loading && logs === null ? <Sk w={50} h={28} /> : s.value}
             </div>
           </div>
         ))}
@@ -400,7 +432,7 @@ export default function ReportsPage() {
           }}
         >
           {error} —{" "}
-          <button onClick={loadLogs} style={{ color: "#c00", fontWeight: 600 }}>
+          <button onClick={load} style={{ color: "#c00", fontWeight: 600 }}>
             Retry
           </button>
         </div>
@@ -426,8 +458,8 @@ export default function ReportsPage() {
           onChange={(e) => setSearch(e.target.value)}
         />
         <select
-          value={severityFilter}
-          onChange={(e) => setSeverityFilter(e.target.value)}
+          value={sevFilter}
+          onChange={(e) => setSevFilter(e.target.value)}
           style={{
             padding: "11px 14px",
             border: "1.5px solid #e8eaf0",
@@ -436,6 +468,7 @@ export default function ReportsPage() {
             fontWeight: 600,
             outline: "none",
             cursor: "pointer",
+            background: "#fff",
           }}
         >
           <option value="all">All Severities</option>
@@ -445,8 +478,8 @@ export default function ReportsPage() {
           <option value="Critical">Critical</option>
         </select>
         <select
-          value={actionFilter}
-          onChange={(e) => setActionFilter(e.target.value)}
+          value={actFilter}
+          onChange={(e) => setActFilter(e.target.value)}
           style={{
             padding: "11px 14px",
             border: "1.5px solid #e8eaf0",
@@ -455,6 +488,7 @@ export default function ReportsPage() {
             fontWeight: 600,
             outline: "none",
             cursor: "pointer",
+            background: "#fff",
           }}
         >
           <option value="all">All Actions</option>
@@ -462,6 +496,8 @@ export default function ReportsPage() {
           <option value="Update">Update</option>
           <option value="Delete">Delete</option>
           <option value="View">View</option>
+          <option value="Login">Login</option>
+          <option value="Logout">Logout</option>
         </select>
       </div>
 
@@ -552,7 +588,7 @@ export default function ReportsPage() {
                   onMouseLeave={(e) => (e.currentTarget.style.background = "")}
                 >
                   <td style={{ padding: "14px 16px" }}>
-                    <ActionBadge action={resolveAction(log.action)} />
+                    <ActionBadge action={log.action} />
                   </td>
                   <td style={{ padding: "14px 16px" }}>
                     <div
@@ -575,11 +611,11 @@ export default function ReportsPage() {
                         whiteSpace: "nowrap",
                       }}
                     >
-                      {log.reason ?? "—"}
+                      {log.reason ?? log.description ?? "—"}
                     </div>
                   </td>
                   <td style={{ padding: "14px 16px" }}>
-                    <SeverityBadge severity={resolveSeverity(log.severity)} />
+                    <SeverityBadge severity={log.severity} />
                   </td>
                   <td
                     style={{
@@ -599,7 +635,7 @@ export default function ReportsPage() {
                       whiteSpace: "nowrap",
                     }}
                   >
-                    {timeAgo(log.timestamp)}
+                    {timeAgo(log.timestamp ?? log.createdAt)}
                   </td>
                   <td style={{ padding: "14px 16px" }}>
                     {!log.isAcknowledged ? (
@@ -639,7 +675,7 @@ export default function ReportsPage() {
           </tbody>
         </table>
 
-        {/* Footer */}
+        {/* Pagination footer */}
         <div
           style={{
             display: "flex",
@@ -656,7 +692,7 @@ export default function ReportsPage() {
             style={{ fontSize: "0.78rem", color: "#aab0c6", fontWeight: 500 }}
           >
             {loading
-              ? "Loading..."
+              ? "Loading…"
               : `${totalCount.toLocaleString()} total logs · Page ${page} of ${totalPages || 1}`}
           </span>
           <div style={{ display: "flex", gap: 6 }}>
@@ -721,9 +757,10 @@ export default function ReportsPage() {
               padding: 28,
               overflowY: "auto",
               boxSizing: "border-box",
+              animation: "slideIn 0.22s cubic-bezier(0.22,1,0.36,1)",
             }}
           >
-            {/* Header */}
+            {/* Panel header */}
             <div
               style={{
                 display: "flex",
@@ -742,7 +779,7 @@ export default function ReportsPage() {
                     color: "#1a1f36",
                   }}
                 >
-                  {selected.resourceType}
+                  {selected.resourceType ?? "—"}
                 </div>
               </div>
               <button
@@ -759,13 +796,20 @@ export default function ReportsPage() {
               </button>
             </div>
 
-            {/* Fields */}
+            {/* Detail rows */}
             {[
               ["Severity", <SeverityBadge severity={selected.severity} />],
-              ["Reason", selected.reason ?? "—"],
+              ["Action", resolveAction(selected.action)],
+              ["Reason", selected.reason ?? selected.description ?? "—"],
               ["IP Address", selected.ipAddress ?? "—"],
-              ["Timestamp", new Date(selected.timestamp).toLocaleString()],
+              [
+                "Timestamp",
+                selected.timestamp
+                  ? new Date(selected.timestamp).toLocaleString()
+                  : new Date(selected.createdAt).toLocaleString(),
+              ],
               ["Resource ID", selected.resourceId ?? "—"],
+              ["User ID", selected.userId ?? selected.performedByUserId ?? "—"],
               ["Acknowledged", selected.isAcknowledged ? "✓ Yes" : "No"],
               [
                 "Compliance",
@@ -777,12 +821,18 @@ export default function ReportsPage() {
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  alignItems: "center",
+                  alignItems: "flex-start",
                   padding: "12px 0",
                   borderBottom: "1px solid #f0f1f7",
                 }}
               >
-                <span style={{ fontSize: "0.82rem", color: "#6b7280" }}>
+                <span
+                  style={{
+                    fontSize: "0.82rem",
+                    color: "#6b7280",
+                    flexShrink: 0,
+                  }}
+                >
                   {label}
                 </span>
                 <span
@@ -792,6 +842,7 @@ export default function ReportsPage() {
                     color: "#1a1f36",
                     textAlign: "right",
                     maxWidth: "60%",
+                    wordBreak: "break-all",
                   }}
                 >
                   {val}
@@ -799,7 +850,7 @@ export default function ReportsPage() {
               </div>
             ))}
 
-            {/* Changes */}
+            {/* Changes JSON */}
             {selected.changes && selected.changes.length > 0 && (
               <div style={{ marginTop: 16 }}>
                 <div

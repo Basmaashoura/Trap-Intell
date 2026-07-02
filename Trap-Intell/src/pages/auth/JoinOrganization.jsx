@@ -10,7 +10,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import styles from "./JoinOrganization.module.css";
 import verifyImage from "../../assets/images/verfiy.png";
 import Logo from "../../components/Logo";
-import { api } from "../../services/api"; // ← your axios instance with baseURL + interceptors
+import api from "../../services/api";
 
 const EyeIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -36,6 +36,7 @@ const INVITE_ERROR_MESSAGES = {
 function parseError(err) {
   const code = err?.errors?.[0]?.code || err?.code;
   return INVITE_ERROR_MESSAGES[code] || err?.message || "Something went wrong.";
+  // err.message is already set by parseResponse() in api.js
 }
 
 // Password strength checker
@@ -74,7 +75,7 @@ export default function JoinOrganization() {
 
   const strength = getPasswordStrength(password);
 
-  // ── Fetch invitation details on mount ──────────────────────────────────────
+  // ── Fetch invitation details ──────────────────────────────────
   useEffect(() => {
     if (!token) {
       setFetchStatus("error");
@@ -84,12 +85,14 @@ export default function JoinOrganization() {
 
     (async () => {
       try {
-        const { data } = await api.get(`/invitations/${token}`);
+        // Before: api.get(`/invitations/${token}`)  ← wrong path
+        // After:
+        const data = await api.get(`/api/organizations/invitations/${token}`);
         setInvitation(data);
         setFetchStatus("ok");
       } catch (err) {
         setFetchStatus("error");
-        setError(parseError(err?.response?.data || err));
+        setError(parseError(err));
       }
     })();
   }, [token]);
@@ -125,16 +128,18 @@ export default function JoinOrganization() {
     setLoading(true);
 
     try {
-      await api.post(`/invitations/${token}/accept`, {
+      // Before: api.post(`/invitations/${token}/accept`, {...})
+      // After — matches the endpoint from test file:
+      await api.post("/api/organizations/invitations/accept", {
+        token, // ← token in body
         firstName: firstName.trim(),
         lastName: lastName.trim(),
         password,
       });
 
-      // Accepted — tell user to verify email then log in
       navigate("/check-email", { state: { fromInvite: true } });
     } catch (err) {
-      setError(parseError(err?.response?.data || err));
+      setError(parseError(err));
     } finally {
       setLoading(false);
     }
@@ -146,10 +151,10 @@ export default function JoinOrganization() {
       return;
     setLoading(true);
     try {
-      await api.post(`/invitations/${token}/decline`);
+      // Check if this endpoint exists — from test file only /accept was confirmed
+      await api.post(`/api/organizations/invitations/${token}/decline`);
       navigate("/login");
     } catch {
-      // Even on error, redirect — the invite is unusable either way
       navigate("/login");
     }
   };

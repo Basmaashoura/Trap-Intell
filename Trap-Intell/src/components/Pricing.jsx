@@ -1,57 +1,42 @@
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useScrollReveal } from "../hooks/useScrollReveal";
+import { api } from "../services/api";
 import PriceCard from "./PriceCard";
 import styles from "./Pricing.module.css";
 
 function Pricing() {
   const pricingReveal = useScrollReveal();
+  const navigate = useNavigate();
+  const [billing, setBilling] = useState("monthly");
+  const [plans, setPlans] = useState(FALLBACK_PLANS); // ← start with fallback
+  const [loading, setLoading] = useState(false);
 
-  const plans = [
-    {
-      tier: "Starter",
-      description: "Perfect for small teams getting started",
-      monthlyPrice: 49,
-      yearlyPrice: 39,
-      features: [
-        "10 User accounts",
-        "5 Honeypot deployments",
-        "Real-time alerts",
-        "Email support",
-      ],
-      featured: false,
-      buttonStyle: "btn-plan-outline",
-    },
-    {
-      tier: "Professional",
-      description: "For growing organizations",
-      monthlyPrice: 149,
-      yearlyPrice: 119,
-      features: [
-        "50 User accounts",
-        "20 Honeypot deployments",
-        "Real-time alerts",
-        "Priority support",
-        "Advanced analytics",
-      ],
-      featured: true,
-      buttonStyle: "btn-plan-white",
-    },
-    {
-      tier: "Enterprise",
-      description: "For large-scale operations",
-      monthlyPrice: 499,
-      yearlyPrice: 399,
-      features: [
-        "Unlimited User accounts",
-        "Unlimited Honeypot deployments",
-        "Real-time alerts",
-        "Dedicated account manager",
-        "Custom integrations",
-        "SLA guarantee",
-      ],
-      featured: false,
-      buttonStyle: "btn-plan-outline",
-    },
-  ];
+  useEffect(() => {
+    // Only fetch real plans if logged in
+    if (!isAuthenticated) return;
+
+    setLoading(true);
+    api
+      .get("/api/plans")
+      .then((data) => {
+        const items = Array.isArray(data)
+          ? data
+          : (data.items ?? data.plans ?? []);
+        setPlans(items);
+      })
+      .catch(() => setPlans(FALLBACK_PLANS))
+      .finally(() => setLoading(false));
+  }, [isAuthenticated]);
+
+  const handleSelectPlan = (plan) => {
+    // Scroll to the hero/signup section on the homepage
+    document.getElementById("hero")?.scrollIntoView({ behavior: "smooth" });
+    // OR scroll to top
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const displayPlans = loading ? FALLBACK_PLANS : plans;
 
   return (
     <section className={styles.pricing} id="pricing">
@@ -61,19 +46,17 @@ function Pricing() {
           Choose the perfect plan for your organization
         </p>
 
-        {/* <!-- Toggle --> */}
+        {/* Toggle */}
         <div className={styles.pricingToggle}>
           <button
-            className={`${styles.toggleBtn} ${styles.toggleBtnActive}`}
-            id="btn-monthly"
-            // onClick="setPricing('monthly')"
+            className={`${styles.toggleBtn} ${billing === "monthly" ? styles.toggleBtnActive : ""}`}
+            onClick={() => setBilling("monthly")}
           >
             Monthly
           </button>
           <button
-            className={styles.toggleBtn}
-            id="btn-yearly"
-            // onclick="setPricing('yearly')"
+            className={`${styles.toggleBtn} ${billing === "yearly" ? styles.toggleBtnActive : ""}`}
+            onClick={() => setBilling("yearly")}
           >
             Yearly
           </button>
@@ -81,16 +64,16 @@ function Pricing() {
         </div>
 
         <div className={styles.pricingGrid} ref={pricingReveal}>
-          {plans.map((plan, index) => (
+          {displayPlans.map((plan, index) => (
             <PriceCard
-              key={index}
-              tier={plan.tier}
-              description={plan.description}
-              monthlyPrice={plan.monthlyPrice}
-              yearlyPrice={plan.yearlyPrice}
-              features={plan.features}
-              featured={plan.featured}
-              buttonStyle={plan.buttonStyle}
+              key={plan.id ?? index}
+              plan={plan}
+              billing={billing}
+              featured={
+                plan.name === "Professional" || plan.type === "Featured"
+              }
+              onSelect={() => handleSelectPlan(plan)}
+              loading={loading}
             />
           ))}
         </div>
@@ -98,5 +81,53 @@ function Pricing() {
     </section>
   );
 }
+
+// ── Fallback while loading or if API fails ─────────────────────
+const FALLBACK_PLANS = [
+  {
+    id: "aaaa1111-1111-1111-1111-111111111111",
+    name: "Free Tier",
+    description:
+      "Perfect for small teams getting started with honeypot technology.",
+    type: "Free",
+    pricing: { Monthly: { Amount: 0 }, Annually: { Amount: 0 } },
+    features: [
+      { Name: "2 Honeypot deployments" },
+      { Name: "3 User accounts" },
+      { Name: "Real-time alerts" },
+      { Name: "Email support" },
+    ],
+  },
+  {
+    id: "aaaa2222-2222-2222-2222-222222222222",
+    name: "Professional",
+    description:
+      "For growing security teams needing advanced threat detection.",
+    type: "Paid",
+    pricing: { Monthly: { Amount: 499 }, Annually: { Amount: 4990 } },
+    features: [
+      { Name: "10 Honeypot deployments" },
+      { Name: "10 User accounts" },
+      { Name: "AI Threat Analysis" },
+      { Name: "Threat Feeds" },
+      { Name: "Priority support" },
+    ],
+  },
+  {
+    id: "aaaa3333-3333-3333-3333-333333333333",
+    name: "Enterprise",
+    description: "Full-featured solution for enterprise security operations.",
+    type: "Paid",
+    pricing: { Monthly: { Amount: 1999 }, Annually: { Amount: 19990 } },
+    features: [
+      { Name: "50 Honeypot deployments" },
+      { Name: "50 User accounts" },
+      { Name: "Predictive Analytics" },
+      { Name: "SOC2 Compliance" },
+      { Name: "Dedicated account manager" },
+      { Name: "SLA guarantee" },
+    ],
+  },
+];
 
 export default Pricing;

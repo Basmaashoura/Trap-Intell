@@ -1,5 +1,6 @@
+// src/App.jsx
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import AppLayout from "./components/AppLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PageNotFound from "./pages/PageNotFound";
@@ -23,22 +24,28 @@ import Dashboard from "./pages/Dashboard";
 import AlertsPage from "./pages/AlertsPage";
 import AttacksPage from "./pages/AttacksPage";
 import HoneypotsPage from "./pages/HoneypotsPage";
+import ThreatActorsPage from "./pages/ThreatActorsPage";
 import ReportsPage from "./pages/ReportsPage";
+
+// ── Root redirect: landing if logged out, dashboard if logged in ──
+function RootRedirect() {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <HomePage />;
+}
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* ── Public routes ── */}
-          <Route path="/" element={<HomePage />} />
+          {/* ── Landing ── */}
+          <Route path="/" element={<RootRedirect />} />
+
+          {/* ── Public auth routes ── */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/create-org" element={<CreateOrganization />} />
-
-          {/* Invitation link — must match /join/:token (backend sends this format) */}
           <Route path="/join/:token" element={<JoinOrganization />} />
-
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/reset-password" element={<SetPasswordPage />} />
           <Route path="/check-email" element={<CheckEmailPage />} />
@@ -47,7 +54,7 @@ function App() {
           <Route path="/account-suspended" element={<AccountSuspendedPage />} />
           <Route path="/setup-complete" element={<SetupComplete />} />
 
-          {/* ── Protected app routes (all share AppLayout) ── */}
+          {/* ── Protected app routes ── */}
           <Route
             element={
               <ProtectedRoute>
@@ -59,18 +66,12 @@ function App() {
             <Route path="/honeypots" element={<HoneypotsPage />} />
             <Route path="/attacks" element={<AttacksPage />} />
             <Route path="/alerts" element={<AlertsPage />} />
+            <Route path="/threat-actors" element={<ThreatActorsPage />} />
             <Route path="/reports" element={<ReportsPage />} />
-
-            {/* Placeholders — pages not built yet */}
-            <Route
-              path="/threat-actors"
-              element={<ComingSoon page="Threat Actors" />}
-            />
-            <Route path="/reports" element={<ComingSoon page="Reports" />} />
           </Route>
 
-          {/* / → dashboard if logged in, login if not */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          {/* Root → dashboard */}
+          {/* <Route path="/" element={<Navigate to="/dashboard" replace />} /> */}
 
           {/* Catch-all */}
           <Route path="*" element={<PageNotFound />} />

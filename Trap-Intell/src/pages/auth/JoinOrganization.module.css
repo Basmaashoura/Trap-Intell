@@ -406,3 +406,161 @@
     padding-inline: 20px;
   }
 }
+
+/* Invitation metadata chips */
+.inviteMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: rgba(64, 68, 228, 0.07);
+  border: 1px solid rgba(64, 68, 228, 0.18);
+  border-radius: 20px;
+  font-size: 0.78rem;
+  color: #3d42df;
+}
+
+/* Error banner */
+.errorBanner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 14px;
+  background: #fff5f5;
+  border: 1.5px solid #feb2b2;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #c53030;
+  margin-bottom: 16px;
+  animation: fadeIn 0.2s ease;
+}
+
+/* Field-level errors */
+.fieldError {
+  display: block;
+  margin-top: 4px;
+  font-size: 0.75rem;
+  color: #e53e3e;
+}
+
+/* Password eye toggle */
+.eyeToggle {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+/* Password strength meter */
+.strengthWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.strengthBar {
+  flex: 1;
+  height: 4px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.strengthFill {
+  height: 100%;
+  border-radius: 4px;
+  transition:
+    width 0.3s ease,
+    background 0.3s ease;
+}
+
+.strengthLabel {
+  font-size: 0.75rem;
+  font-weight: 600;
+  min-width: 44px;
+}
+
+/* Password hint */
+.pwHint {
+  font-size: 0.74rem;
+  color: var(--clr-text-muted, #718096);
+  margin: -4px 0 4px;
+}
+
+/* Invalid token card */
+.invalidCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 16px;
+  padding: 40px 24px;
+}
+
+.invalidIcon {
+  margin-bottom: 8px;
+}
+
+/* Loading skeleton */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+  border-radius: 8px;
+  display: block;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Button spinner */
+.spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 2.5px solid rgba(255, 255, 255, 0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+.btnAccept:disabled,
+.btnDecline:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -6,7 +6,6 @@ import Services from "../components/Services";
 import CoreFeatures from "../components/CoreFeatures";
 import Pricing from "../components/Pricing";
 import Footer from "../components/Footer";
-// import "../assets/styles/homepage.css";
 
 function HomePage() {
   return (

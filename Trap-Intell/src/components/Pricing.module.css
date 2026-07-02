@@ -82,7 +82,7 @@
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
-  align-items: start;
+  align-items: stretch; /* ← change from "start" to "stretch" */
 }
 
 .priceCard {
@@ -97,8 +97,9 @@
     opacity 0.5s,
     transform 0.5s,
     box-shadow 0.2s;
+  display: flex; /* ← add */
+  flex-direction: column; /* ← add */
 }
-
 .priceCard[data-visible="true"] {
   opacity: 1;
   transform: translateY(0);
@@ -109,6 +110,7 @@
   border-color: #4044e4;
   box-shadow: 0 16px 48px rgba(64, 68, 228, 0.3);
   transform: translateY(-8px) !important;
+  margin-bottom: -8px;
 }
 
 .priceFeatured[data-visible="true"] {
@@ -194,6 +196,7 @@
   flex-direction: column;
   gap: 12px;
   margin-bottom: 32px;
+  flex: 1;
 }
 
 .priceFeatures li {
@@ -220,6 +223,7 @@
     transform 0.18s,
     box-shadow 0.18s,
     background 0.18s;
+  margin-top: auto;
 }
 
 .btnPlanOutline {

@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import Logo from "../../components/Logo";
 import lockImage from "../../assets/images/lock.png";
 import styles from "./SignUpPage.module.css";
+import { api } from "../../services/api";
 
 const EyeIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -18,12 +19,99 @@ const EyeIcon = () => (
 );
 
 function SignUpPage() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Pre-fill invitation token from URL: /signup?token=inv_xxx
+  const tokenFromUrl = searchParams.get("token") ?? "";
+
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+    invitationToken: tokenFromUrl, // ← pre-filled from URL if present
+    terms: false,
+  });
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setForm((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+    if (error) setError("");
+  };
+
+  const validate = () => {
+    if (!form.firstName.trim()) return "First name is required.";
+    if (!form.lastName.trim()) return "Last name is required.";
+    if (!form.email.trim()) return "Email is required.";
+    if (!form.invitationToken.trim())
+      return "Invitation token is required. Registration is invite-only.";
+    if (!form.password) return "Password is required.";
+    if (form.password.length < 8)
+      return "Password must be at least 8 characters.";
+    if (!/[A-Z]/.test(form.password))
+      return "Password must contain at least one uppercase letter.";
+    if (!/[a-z]/.test(form.password))
+      return "Password must contain at least one lowercase letter.";
+    if (!/[0-9]/.test(form.password))
+      return "Password must contain at least one number.";
+    if (!/[^A-Za-z0-9]/.test(form.password))
+      return "Password must contain at least one special character.";
+    if (form.password !== form.confirmPassword)
+      return "Passwords do not match.";
+    if (!form.terms) return "You must agree to the Terms of Service.";
+    return null;
+  };
+
+  const handleSubmit = async () => {
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+
+    try {
+      // Confirmed backend contract (invite-only):
+      // POST /api/auth/register
+      // Body: { email, password, confirmPassword, firstName, lastName, invitationToken }
+      // NO userName, NO organizationId
+      await api.post("/api/auth/register", {
+        email: form.email.trim(),
+        password: form.password,
+        confirmPassword: form.confirmPassword,
+        firstName: form.firstName.trim(),
+        lastName: form.lastName.trim(),
+        invitationToken: form.invitationToken.trim(),
+      });
+
+      navigate("/check-email", { state: { email: form.email.trim() } });
+    } catch (err) {
+      setError(err.message ?? "Registration failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") handleSubmit();
+  };
 
   return (
     <>
-      <div className={styles.binaryBg}></div>
+      <div className={styles.binaryBg} />
 
       <header className={styles.header}>
         <Logo />
@@ -42,9 +130,45 @@ function SignUpPage() {
           <div className={styles.formPanel}>
             <div className={styles.formCard}>
               <div className={styles.formHeader}>
-                <h1>Create Organization</h1>
-                <p>Get started with enterprise-grade security monitoring</p>
+                <h1>Create Account</h1>
+                <p>Enter your invitation token to join your organization.</p>
               </div>
+
+              {/* Error banner */}
+              {error && (
+                <div
+                  style={{
+                    background: "#fff0f0",
+                    border: "1px solid #fcc",
+                    borderRadius: 8,
+                    padding: "12px 16px",
+                    marginBottom: 16,
+                    color: "#c00",
+                    fontSize: "0.88rem",
+                    fontWeight: 500,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+                    <circle
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="#e53e3e"
+                      strokeWidth="2"
+                    />
+                    <path
+                      d="M12 8v4M12 16h.01"
+                      stroke="#e53e3e"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  {error}
+                </div>
+              )}
 
               <div className={styles.formGrid}>
                 {/* First Name */}
@@ -56,6 +180,10 @@ function SignUpPage() {
                       id="firstName"
                       name="firstName"
                       placeholder="John"
+                      value={form.firstName}
+                      onChange={handleChange}
+                      onKeyDown={handleKeyDown}
+                      disabled={loading}
                       required
                     />
                   </div>
@@ -70,6 +198,10 @@ function SignUpPage() {
                       id="lastName"
                       name="lastName"
                       placeholder="Doe"
+                      value={form.lastName}
+                      onChange={handleChange}
+                      onKeyDown={handleKeyDown}
+                      disabled={loading}
                       required
                     />
                   </div>
@@ -83,7 +215,11 @@ function SignUpPage() {
                       type="email"
                       id="email"
                       name="email"
-                      placeholder="john.doe@gmail.com"
+                      placeholder="john.doe@company.com"
+                      value={form.email}
+                      onChange={handleChange}
+                      onKeyDown={handleKeyDown}
+                      disabled={loading}
                       required
                     />
                   </div>
@@ -92,14 +228,73 @@ function SignUpPage() {
                 {/* Phone */}
                 <div className={styles.formGroup}>
                   <div className={styles.fieldWrap}>
-                    <label htmlFor="phone">Phone Number</label>
+                    <label htmlFor="phone">
+                      Phone Number{" "}
+                      <span style={{ color: "#aab0c6", fontWeight: 400 }}>
+                        (optional)
+                      </span>
+                    </label>
                     <input
                       type="tel"
                       id="phone"
                       name="phone"
                       placeholder="+1 (123) 456-7890"
+                      value={form.phone}
+                      onChange={handleChange}
+                      disabled={loading}
+                    />
+                  </div>
+                </div>
+
+                {/* Invitation Token — full width, prominent */}
+                <div className={styles.formGroupFull}>
+                  <div className={styles.fieldWrap}>
+                    <label htmlFor="invitationToken">
+                      Invitation Token
+                      <span
+                        style={{
+                          marginLeft: 6,
+                          padding: "2px 8px",
+                          background: "rgba(64,68,228,0.08)",
+                          color: "#4044e4",
+                          borderRadius: 4,
+                          fontSize: "0.7rem",
+                          fontWeight: 700,
+                        }}
+                      >
+                        REQUIRED
+                      </span>
+                    </label>
+                    <input
+                      type="text"
+                      id="invitationToken"
+                      name="invitationToken"
+                      placeholder="inv_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                      value={form.invitationToken}
+                      onChange={handleChange}
+                      onKeyDown={handleKeyDown}
+                      disabled={loading}
+                      spellCheck={false}
+                      autoComplete="off"
+                      style={{
+                        fontFamily: "monospace",
+                        fontSize: "0.85rem",
+                        letterSpacing: form.invitationToken
+                          ? "0.02em"
+                          : "normal",
+                      }}
                       required
                     />
+                    <p
+                      style={{
+                        margin: "6px 0 0",
+                        fontSize: "0.75rem",
+                        color: "#9098b1",
+                      }}
+                    >
+                      You should have received this token via email invitation.
+                      Alternatively, go to your invitation link directly.
+                    </p>
                   </div>
                 </div>
 
@@ -112,6 +307,10 @@ function SignUpPage() {
                       name="password"
                       placeholder=" Enter your password"
                       autoComplete="new-password"
+                      value={form.password}
+                      onChange={handleChange}
+                      onKeyDown={handleKeyDown}
+                      disabled={loading}
                       required
                     />
                     <label htmlFor="password">Password</label>
@@ -122,8 +321,8 @@ function SignUpPage() {
                       <EyeIcon />
                     </span>
                     <p className={styles.pwHint}>
-                      Min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special
-                      character
+                      Min 8 chars · 1 uppercase · 1 lowercase · 1 number · 1
+                      special character
                     </p>
                   </div>
                 </div>
@@ -134,8 +333,12 @@ function SignUpPage() {
                     <input
                       type={showConfirmPassword ? "text" : "password"}
                       id="confirm-password"
-                      name="confirm-password"
+                      name="confirmPassword"
                       placeholder="Confirm password"
+                      value={form.confirmPassword}
+                      onChange={handleChange}
+                      onKeyDown={handleKeyDown}
+                      disabled={loading}
                       required
                     />
                     <label htmlFor="confirm-password">Confirm Password</label>
@@ -147,13 +350,40 @@ function SignUpPage() {
                     >
                       <EyeIcon />
                     </span>
+                    {/* Match indicator */}
+                    {form.confirmPassword && (
+                      <span
+                        style={{
+                          fontSize: "0.75rem",
+                          fontWeight: 600,
+                          marginTop: 4,
+                          display: "block",
+                          color:
+                            form.password === form.confirmPassword
+                              ? "#22c55e"
+                              : "#e53e3e",
+                        }}
+                      >
+                        {form.password === form.confirmPassword
+                          ? "✓ Passwords match"
+                          : "✗ Passwords don't match"}
+                      </span>
+                    )}
                   </div>
                 </div>
 
                 {/* Terms */}
                 <div className={styles.formGroup}>
                   <label htmlFor="terms" className={styles.checkboxLabel}>
-                    <input type="checkbox" id="terms" name="terms" required />
+                    <input
+                      type="checkbox"
+                      id="terms"
+                      name="terms"
+                      checked={form.terms}
+                      onChange={handleChange}
+                      disabled={loading}
+                      required
+                    />
                     <span>
                       I agree to the <Link to="/terms">Terms of Service</Link>{" "}
                       and <Link to="/privacy">Privacy Policy</Link>
@@ -163,8 +393,17 @@ function SignUpPage() {
 
                 {/* Submit */}
                 <div className={styles.formGroupFull}>
-                  <button className={styles.btnPrimary} type="button">
-                    Create Organization Details
+                  <button
+                    className={styles.btnPrimary}
+                    type="button"
+                    onClick={handleSubmit}
+                    disabled={loading}
+                    style={{
+                      opacity: loading ? 0.7 : 1,
+                      cursor: loading ? "not-allowed" : "pointer",
+                    }}
+                  >
+                    {loading ? "Creating account…" : "Create Account"}
                   </button>
                 </div>
 
@@ -185,7 +424,6 @@ function SignUpPage() {
                 {/* Social buttons */}
                 <div className={styles.formGroupFull}>
                   <div className={styles.socialRow}>
-                    {/* Facebook */}
                     <button type="button" className={styles.btnSocial}>
                       <svg
                         width="24"
@@ -199,7 +437,6 @@ function SignUpPage() {
                         />
                       </svg>
                     </button>
-                    {/* Google */}
                     <button type="button" className={styles.btnSocial}>
                       <svg
                         width="24"
@@ -225,7 +462,6 @@ function SignUpPage() {
                         />
                       </svg>
                     </button>
-                    {/* Apple */}
                     <button type="button" className={styles.btnSocial}>
                       <svg
                         width="24"

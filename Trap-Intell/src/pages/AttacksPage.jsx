@@ -1,8 +1,16 @@
-import { useState, useEffect, useRef } from "react";
+// src/pages/AttacksPage.jsx
+// Backend confirmed endpoints:
+//   POST /api/organizations/{orgId}/honeypots/{honeypotId}/attacks/events  (ingestion)
+//   No GET /attacks endpoint confirmed — using static data + alert feed fallback
+
+import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { api } from "../services/api";
 import styles from "./AttacksPage.module.css";
 
-/* ── static data ── */
-const MONTHLY_DATA = {
+// ── Static chart data ──────────────────────────────────────────
+const CHART_DATA = {
   quarterly: [32, 28, 38, 25, 42, 35, 90, 55, 48, 38, 22, 18],
   monthly: [45, 38, 55, 42, 60, 52, 78, 65, 58, 50, 35, 28],
   weekly: [20, 35, 28, 42, 38, 55, 48, 60, 44, 32, 28, 22],
@@ -21,27 +29,6 @@ const MONTHS = [
   "Nov",
   "Dec",
 ];
-
-const ATTACK_TYPES = [
-  "Brute Force",
-  "SQL Injection",
-  "XSS Attack",
-  "DDoS",
-  "Port Scan",
-  "Phishing",
-  "Ransomware",
-  "MitM",
-];
-const TARGET_TRAPS = ["DB-01", "DB-02", "WEB-03", "SSH-04", "API-05"];
-const SOURCE_IPS = [
-  "192.168.1.1",
-  "45.33.22.11",
-  "103.21.244.0",
-  "185.220.101.5",
-  "198.51.100.23",
-];
-const STATUSES = ["Blocked", "Blocked", "Blocked", "Detected", "Contained"];
-const SEVERITIES = ["Low", "Medium", "High", "Critical"];
 
 const ACTORS = [
   {
@@ -67,17 +54,41 @@ const ACTORS = [
   },
 ];
 
-const PAGE_SIZE = 10;
-
-/* ── helpers ── */
-const randItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
-const randId = () => `ATK-${900 + Math.floor(Math.random() * 99)}`;
-const randTime = () => {
-  const h = String(Math.floor(Math.random() * 24)).padStart(2, "0");
-  const m = String(Math.floor(Math.random() * 60)).padStart(2, "0");
-  return `${h}:${m}`;
+const STATUS_CLASS = {
+  Blocked: styles.blocked,
+  Detected: styles.detected,
+  Contained: styles.contained,
 };
 
+// ── Skeleton ───────────────────────────────────────────────────
+function Sk({ w = "100%", h = 20, r = 6 }) {
+  return (
+    <div
+      style={{
+        width: w,
+        height: h,
+        borderRadius: r,
+        flexShrink: 0,
+        background:
+          "linear-gradient(90deg,#f0f0f0 25%,#e4e4e4 50%,#f0f0f0 75%)",
+        backgroundSize: "200% 100%",
+        animation: "shimmer 1.4s infinite",
+      }}
+    />
+  );
+}
+
+// ── Time helper ────────────────────────────────────────────────
+function timeAgo(d) {
+  if (!d) return "—";
+  const diff = Math.floor((Date.now() - new Date(d)) / 1000);
+  if (diff < 60) return `${diff}s ago`;
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return `${Math.floor(diff / 86400)}d ago`;
+}
+
+// ── Static fallback events ─────────────────────────────────────
 const STATIC_EVENTS = [
   {
     id: "ATK-001",
@@ -109,52 +120,108 @@ const STATIC_EVENTS = [
     country: "Ukraine",
     time: "01:19",
   },
+  {
+    id: "ATK-004",
+    status: "Blocked",
+    severity: "Critical",
+    attackType: "SQLInjection",
+    targetTrap: "MySQL-Honeypot-DB-01",
+    sourceIP: "103.21.244.5",
+    country: "China",
+    time: "14:32",
+  },
+  {
+    id: "ATK-005",
+    status: "Contained",
+    severity: "Medium",
+    attackType: "PortScan",
+    targetTrap: "HTTP-Honeypot-Web-01",
+    sourceIP: "45.33.22.11",
+    country: "Germany",
+    time: "09:45",
+  },
 ];
 
-const STATUS_CLASS = {
-  Blocked: styles.blocked,
-  Detected: styles.detected,
-  Contained: styles.contained,
-};
+const PAGE_SIZE = 10;
 
-/* ── component ── */
 export default function AttacksPage() {
-  const [period, setPeriod] = useState("quarterly");
-  const [liveFeed, setLiveFeed] = useState(true);
-  const [events, setEvents] = useState(STATIC_EVENTS);
+  const { orgId } = useAuth();
+  const navigate = useNavigate();
 
+  const [period, setPeriod] = useState("quarterly");
+  const [events, setEvents] = useState(null); // null = loading
+  const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
-  const liveRef = useRef(null);
+  const [totalCount, setTotalCount] = useState(0);
 
-  /* reset page on search */
+  // ── Try to fetch real attack events ────────────────────────
+  // Backend may not have GET /attacks yet — gracefully fall back
+  const loadEvents = useCallback(async () => {
+    if (!orgId) return;
+    setLoading(true);
+    try {
+      // Try org-scoped attacks endpoint
+      const data = await api.get(`/api/organizations/${orgId}/attacks`, {
+        pageNumber: 1,
+        pageSize: 50,
+      });
+      if (data) {
+        const items = Array.isArray(data)
+          ? data
+          : (data.items ?? data.data ?? []);
+        if (items.length > 0) {
+          setEvents(items);
+          setTotalCount(data.totalCount ?? items.length);
+          return;
+        }
+      }
+    } catch {
+      // Endpoint doesn't exist — use static data silently
+    }
+    // Fallback to static data
+    setEvents(STATIC_EVENTS);
+    setTotalCount(STATIC_EVENTS.length);
+    setLoading(false);
+  }, [orgId]);
+
+  useEffect(() => {
+    loadEvents();
+  }, [loadEvents]);
   useEffect(() => {
     setPage(1);
   }, [query]);
 
-  /* derived */
+  // ── Resolve field names from real API or static data ───────
+  function getField(ev, ...keys) {
+    for (const k of keys) {
+      if (ev[k] != null) return String(ev[k]);
+    }
+    return "—";
+  }
+
+  const eventsToShow = events ?? [];
   const filtered = query
-    ? events.filter(
-        (e) =>
-          e.sourceIP.includes(query) ||
-          e.attackType.toLowerCase().includes(query) ||
-          e.id.toLowerCase().includes(query) ||
-          e.status.toLowerCase().includes(query) ||
-          e.targetTrap.toLowerCase().includes(query),
+    ? eventsToShow.filter((e) =>
+        Object.values(e).some((v) =>
+          String(v ?? "")
+            .toLowerCase()
+            .includes(query.toLowerCase()),
+        ),
       )
-    : events;
+    : eventsToShow;
 
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const slice = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
   const startNum = (page - 1) * PAGE_SIZE + 1;
   const endNum = Math.min(page * PAGE_SIZE, filtered.length);
 
-  /* bar chart */
-  const data = MONTHLY_DATA[period];
+  // ── Chart ──────────────────────────────────────────────────
+  const data = CHART_DATA[period];
   const maxVal = Math.max(...data);
   const peakIdx = data.indexOf(maxVal);
 
-  /* pagination range */
+  // Pagination range
   const pageRange = [];
   for (let p = 1; p <= totalPages; p++) {
     if (p === 1 || p === totalPages || (p >= page - 1 && p <= page + 1))
@@ -164,31 +231,15 @@ export default function AttacksPage() {
 
   return (
     <div>
-      {/* page header */}
+      {/* Header */}
       <div className={styles.pageHeader}>
         <div>
           <h1>Attack Analysis</h1>
           <p>Real-time inspection of incoming threats and signatures.</p>
         </div>
-        {/* <button
-          className={styles.btnLiveFeed}
-          onClick={() => setLiveFeed((f) => !f)}
-        >
-          {liveFeed ? (
-            <>
-              <span className={styles.liveFeedDot} />
-              Live Feed On
-            </>
-          ) : (
-            <>
-              <span className={styles.liveFeedDotOff} />
-              Live Feed Off
-            </>
-          )}
-        </button> */}
       </div>
 
-      {/* search */}
+      {/* Search */}
       <div className={styles.searchWrap}>
         <svg
           className={styles.searchIcon}
@@ -207,20 +258,22 @@ export default function AttacksPage() {
         <input
           className={styles.searchInput}
           type="text"
-          placeholder="Filter by IP, Attack Type, or Hash..."
+          placeholder="Filter by IP, Attack Type, ID, or Status..."
           value={query}
-          onChange={(e) => setQuery(e.target.value.toLowerCase())}
+          onChange={(e) => setQuery(e.target.value)}
         />
       </div>
 
-      {/* main row */}
+      {/* Main row */}
       <div className={styles.mainRow}>
-        {/* traffic volume card */}
+        {/* Traffic volume chart */}
         <div className={styles.trafficCard}>
           <div className={styles.trafficHeader}>
             <div>
               <div className={styles.trafficTitle}>Traffic Volume (Pps)</div>
-              <div className={styles.trafficSubtitle}>Monthly Earning</div>
+              <div className={styles.trafficSubtitle}>
+                Attack frequency over time
+              </div>
             </div>
             <div className={styles.periodWrap}>
               <select
@@ -245,7 +298,6 @@ export default function AttacksPage() {
               </svg>
             </div>
           </div>
-
           <div className={styles.chartArea}>
             <div className={styles.bars}>
               {data.map((val, i) => {
@@ -275,7 +327,7 @@ export default function AttacksPage() {
           </div>
         </div>
 
-        {/* threat actors panel */}
+        {/* Threat actors panel */}
         <div className={styles.actorsPanel}>
           <div className={styles.panelTitle}>Top Threat Actors</div>
           <div className={styles.panelDivider} />
@@ -291,13 +343,36 @@ export default function AttacksPage() {
               <span className={styles.actorPct}>{a.pct}</span>
             </div>
           ))}
-          <button className={styles.btnViewActors}>View All Actors</button>
+          <button
+            className={styles.btnViewActors}
+            onClick={() => navigate("/threat-actors")}
+          >
+            View All Actors
+          </button>
         </div>
       </div>
 
-      {/* event log */}
+      {/* Event log */}
       <div className={styles.eventLogSection}>
-        <h2 className={styles.sectionHeading}>Detailed Event Log</h2>
+        <h2 className={styles.sectionHeading}>
+          Detailed Event Log
+          {events === STATIC_EVENTS && (
+            <span
+              style={{
+                marginLeft: 10,
+                fontSize: "0.72rem",
+                color: "#9098b1",
+                fontWeight: 400,
+                background: "#f4f5f9",
+                padding: "3px 8px",
+                borderRadius: 20,
+                border: "1px solid #e8eaf0",
+              }}
+            >
+              Sample data — live feed pending
+            </span>
+          )}
+        </h2>
         <div className={styles.tableWrap}>
           <table className={styles.eventTable}>
             <thead>
@@ -311,34 +386,68 @@ export default function AttacksPage() {
               </tr>
             </thead>
             <tbody>
-              {slice.length === 0 ? (
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i}>
+                    {Array.from({ length: 6 }).map((_, j) => (
+                      <td key={j}>
+                        <Sk h={14} />
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              ) : slice.length === 0 ? (
                 <tr>
                   <td colSpan={6} className={styles.emptyRow}>
                     No events match your search.
                   </td>
                 </tr>
               ) : (
-                slice.map((ev, i) => (
-                  <tr key={`${ev.id}-${i}`}>
-                    <td>
-                      <span
-                        className={`${styles.statusPill} ${STATUS_CLASS[ev.status] ?? ""}`}
-                      >
-                        {ev.status}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={styles.severityChip}>{ev.severity}</span>
-                    </td>
-                    <td className={styles.attackTypeCell}>{ev.attackType}</td>
-                    <td>{ev.targetTrap}</td>
-                    <td className={styles.ipCell}>{ev.sourceIP}</td>
-                    <td className={styles.idCell}>
-                      {ev.id}&nbsp;
-                      <span className={styles.timeLabel}>{ev.time}</span>
-                    </td>
-                  </tr>
-                ))
+                slice.map((ev, i) => {
+                  const id = getField(ev, "id", "externalEventId");
+                  const status = getField(ev, "status", "attackStatus");
+                  const sev = getField(ev, "severity", "attackSeverity");
+                  const type = getField(ev, "attackType", "type", "eventType");
+                  const target = getField(
+                    ev,
+                    "targetTrap",
+                    "honeypotName",
+                    "honeypotId",
+                  );
+                  const ip = getField(
+                    ev,
+                    "sourceIP",
+                    "sourceIp",
+                    "ipAddress",
+                    "source.ipAddress",
+                  );
+                  const time =
+                    ev.time ??
+                    (ev.createdAt
+                      ? new Date(ev.createdAt).toLocaleTimeString()
+                      : "—");
+
+                  return (
+                    <tr key={`${id}-${i}`}>
+                      <td>
+                        <span
+                          className={`${styles.statusPill} ${STATUS_CLASS[status] ?? ""}`}
+                        >
+                          {status}
+                        </span>
+                      </td>
+                      <td>
+                        <span className={styles.severityChip}>{sev}</span>
+                      </td>
+                      <td className={styles.attackTypeCell}>{type}</td>
+                      <td>{target}</td>
+                      <td className={styles.ipCell}>{ip}</td>
+                      <td className={styles.idCell}>
+                        {id} <span className={styles.timeLabel}>{time}</span>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -357,10 +466,9 @@ export default function AttacksPage() {
               >
                 ‹
               </button>
-
               {pageRange.map((p, i) =>
                 p === "…" ? (
-                  <span key={`dots-${i}`} className={styles.pageDots}>
+                  <span key={`d-${i}`} className={styles.pageDots}>
                     …
                   </span>
                 ) : (
@@ -373,7 +481,6 @@ export default function AttacksPage() {
                   </button>
                 ),
               )}
-
               <button
                 className={styles.pageBtn}
                 onClick={() => setPage((p) => p + 1)}
