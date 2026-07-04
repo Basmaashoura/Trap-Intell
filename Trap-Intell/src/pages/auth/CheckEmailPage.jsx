@@ -1,11 +1,14 @@
 // src/pages/auth/CheckEmailPage.jsx
 import { useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import Logo from "../../components/Logo";
 import toast from "react-hot-toast";
 import styles from "./CheckEmailPage.module.css";
 
 function CheckEmailPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   useEffect(() => {
     toast.success("Verification email sent successfully!");
   }, []);
@@ -70,8 +73,9 @@ function CheckEmailPage() {
 
             {/* Info */}
             <p className={styles.cardInfo}>
-              If an account exists with <strong>john.doe@gmail.com</strong>, you
-              will receive a password reset link shortly.
+              If an account exists with{" "}
+              <strong>{location.state?.email || "your email"}</strong>, you will
+              receive a password reset link shortly.
             </p>
 
             {/* Spam note */}
@@ -83,6 +87,34 @@ function CheckEmailPage() {
             <Link to="/verify-code" className={styles.btnEnterCode}>
               Enter code
             </Link>
+
+            {/* DEV: Bypass to set password */}
+            {process.env.NODE_ENV === "development" && (
+              <button
+                onClick={() =>
+                  navigate("/set-password", {
+                    state: {
+                      email: location.state?.email || "test@company.com",
+                      emailVerificationToken: "dev-mock-token",
+                    },
+                  })
+                }
+                style={{
+                  marginTop: 12,
+                  padding: "10px 20px",
+                  background: "#ff6b6b",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  fontSize: "0.85rem",
+                  fontWeight: 600,
+                  width: "100%",
+                }}
+              >
+                🔧 DEV: Skip to Set Password
+              </button>
+            )}
           </div>
         </div>
       </main>

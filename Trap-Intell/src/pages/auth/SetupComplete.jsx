@@ -1,6 +1,34 @@
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "./SetupComplete.module.css";
 
 export default function SetupComplete() {
+  const navigate = useNavigate();
+  const [seconds, setSeconds] = useState(3);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setSeconds((s) => s - 1);
+    }, 1000);
+
+    const timer = setTimeout(() => {
+      navigate("/login", { replace: true });
+    }, 3000);
+
+    return () => {
+      clearInterval(interval);
+      clearTimeout(timer);
+    };
+  }, [navigate]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      navigate("/login", { replace: true });
+    }, 3000); // 3 seconds
+
+    return () => clearTimeout(timer);
+  }, [navigate]);
+
   return (
     <div className={styles.container}>
       {/* Background */}
@@ -18,7 +46,6 @@ export default function SetupComplete() {
             xmlns="http://www.w3.org/2000/svg"
           >
             <circle cx="40" cy="40" r="40" fill="#4044e4" fillOpacity="0.15" />
-
             <circle
               cx="40"
               cy="40"
@@ -27,7 +54,6 @@ export default function SetupComplete() {
               strokeWidth="2.5"
               fill="none"
             />
-
             <path
               className={styles.checkPath}
               d="M24 40L34 51L56 29"
@@ -39,12 +65,13 @@ export default function SetupComplete() {
           </svg>
         </div>
 
-        {/* Text */}
         <h1 className={styles.title}>Setup Complete</h1>
 
         <p className={styles.subtitle}>
           Your adaptive AI system is now active.
         </p>
+
+        <p className={styles.redirectText}>Redirecting to login...</p>
       </main>
     </div>
   );

@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Logo from "../../components/Logo";
 import forgotImage from "../../assets/Images/passwordf.png";
 import styles from "./ForgotPasswordPage.module.css";
 import api from "../../services/api";
 
 function ForgotPasswordPage() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -19,15 +20,19 @@ function ForgotPasswordPage() {
     }
 
     setLoading(true);
+
     try {
       await api.post("/auth/forgot-password", { email });
-      // Always show success — backend never reveals if account exists
-      setSubmitted(true);
     } catch {
-      // Still show success to avoid account enumeration
-      setSubmitted(true);
+      // ignore in development
     } finally {
       setLoading(false);
+
+      navigate("/verify-code", {
+        state: {
+          email,
+        },
+      });
     }
   };
 

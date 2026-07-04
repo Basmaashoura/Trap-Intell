@@ -1,9 +1,35 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import Logo from "../../components/Logo";
 import verifyImage from "../../assets/Images/passwordf.png";
 import styles from "./VerifyCodePage.module.css";
 
 function VerifyCodePage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  console.log("Verify state:", location.state);
+
+  const [code, setCode] = useState("");
+  const [error, setError] = useState("");
+
+  const handleVerify = (e) => {
+    e.preventDefault();
+    setError("");
+
+    // DEV ONLY
+    if (code.length === 6) {
+      navigate("/set-password", {
+        state: {
+          email: location.state?.email,
+        },
+        replace: true,
+      });
+      return;
+    }
+
+    setError("Please enter a valid 6-digit code.");
+  };
+
   return (
     <>
       <header className={styles.header}>
@@ -35,32 +61,51 @@ function VerifyCodePage() {
                 </p>
               </div>
 
-              {/* code input */}
-              <div className={styles.formGroup}>
-                <div className={styles.fieldWrap}>
-                  <label htmlFor="code">Enter code</label>
-                  <input
-                    type="text"
-                    id="code"
-                    name="code"
-                    placeholder="Enter the code"
-                  />
+              <form onSubmit={handleVerify}>
+                {/* code input */}
+                <div className={styles.formGroup}>
+                  <div className={styles.fieldWrap}>
+                    <label htmlFor="code">Enter code</label>
+                    <input
+                      type="text"
+                      id="code"
+                      name="code"
+                      placeholder="Enter the code"
+                      value={code}
+                      onChange={(e) => setCode(e.target.value)}
+                      maxLength={6}
+                    />
+                  </div>
                 </div>
-              </div>
 
-              {/* resend */}
-              <div className={styles.formGroup}>
-                <p className={styles.resendLink}>
-                  Didn't receive a code? <a href="#">Resend code</a>
-                </p>
-              </div>
+                {error && (
+                  <div className={styles.formGroup}>
+                    <p
+                      style={{
+                        color: "#dc2626",
+                        fontSize: "0.875rem",
+                        margin: 0,
+                      }}
+                    >
+                      {error}
+                    </p>
+                  </div>
+                )}
 
-              {/* submit */}
-              <div className={styles.formGroup}>
-                <button type="button" className={styles.btnSubmit}>
-                  Verify
-                </button>
-              </div>
+                {/* resend */}
+                <div className={styles.formGroup}>
+                  <p className={styles.resendLink}>
+                    Didn't receive a code? <a href="#">Resend code</a>
+                  </p>
+                </div>
+
+                {/* submit */}
+                <div className={styles.formGroup}>
+                  <button type="submit" className={styles.btnSubmit}>
+                    Verify
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
 

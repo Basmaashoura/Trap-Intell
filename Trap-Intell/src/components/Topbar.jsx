@@ -1,5 +1,7 @@
 // src/components/Topbar.jsx
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import NotificationBell from "./NotificationBell";
 import styles from "./Topbar.module.css";
 
 function getInitials(firstName, lastName) {
@@ -7,6 +9,7 @@ function getInitials(firstName, lastName) {
 }
 
 export default function Topbar({ onMenuClick }) {
+  const navigate = useNavigate();
   const { user } = useAuth();
 
   const firstName = user?.firstName ?? "";
@@ -69,23 +72,14 @@ export default function Topbar({ onMenuClick }) {
           {orgName}
         </div>
 
-        {/* notification bell */}
-        <button className={styles.notifBtn} aria-label="Notifications">
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-          </svg>
-          <span className={styles.notifBadge} />
-        </button>
+        {/* <button
+          className={styles.createOrgBtn}
+          onClick={() => navigate("/create-org")}
+        >
+          + Create Organization
+        </button> */}
+
+        <NotificationBell />
 
         <div className={styles.divider} />
 

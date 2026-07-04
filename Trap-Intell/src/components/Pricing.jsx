@@ -4,8 +4,10 @@ import { useScrollReveal } from "../hooks/useScrollReveal";
 import { api } from "../services/api";
 import PriceCard from "./PriceCard";
 import styles from "./Pricing.module.css";
+import { useAuth } from "../context/AuthContext";
 
 function Pricing() {
+  const { isAuthenticated } = useAuth();
   const pricingReveal = useScrollReveal();
   const navigate = useNavigate();
   const [billing, setBilling] = useState("monthly");
@@ -29,12 +31,14 @@ function Pricing() {
       .finally(() => setLoading(false));
   }, [isAuthenticated]);
 
-  const handleSelectPlan = (plan) => {
-    // Scroll to the hero/signup section on the homepage
-    document.getElementById("hero")?.scrollIntoView({ behavior: "smooth" });
-    // OR scroll to top
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+const handleSelectPlan = (plan) => {
+  navigate("/login", {
+    state: {
+      selectedPlan: plan,
+      fromPlanSelection: true,
+    },
+  });
+};
 
   const displayPlans = loading ? FALLBACK_PLANS : plans;
 

@@ -1,48 +1,159 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "./CreateOrganization.module.css";
-
 import lockImage from "../../assets/images/lock.png";
+import { api } from "../../services/api";
+import Header from "../../components/Header";
+import Logo from "../../components/Logo";
+
+const organizationTypes = [
+  { value: 0, label: "SMB" },
+  { value: 1, label: "Educational" },
+  { value: 2, label: "NGO" },
+  { value: 3, label: "Government" },
+  { value: 4, label: "Enterprise" },
+  { value: 5, label: "Startup" },
+  { value: 6, label: "Other" },
+];
+
+const companySizes = [
+  { value: 10, label: "1-10 Employees" },
+  { value: 50, label: "11-50 Employees" },
+  { value: "200", label: "51-200 Employees" },
+  { value: 500, label: "201-500 Employees" },
+  { value: 1000, label: "500+ Employees" },
+];
 
 const CreateOrganization = () => {
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [shake, setShake] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-  const handleCreate = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    type: 4,
+    industry: "",
+    size: "",
+    domain: "",
+    taxId: "",
+    contactEmail: "",
+    contactPhone: "",
+    contactWebsite: "",
+    website: "",
+    allowMultipleAddresses: false,
+    requireApprovalForMembers: false,
+    maximumMembers: 100,
+    enableBilling: false,
+    enableApiAccess: false,
+    parentOrganizationId: null,
+  });
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]:
+        type === "checkbox"
+          ? checked
+          : ["type", "size", "maximumMembers"].includes(name)
+            ? Number(value)
+            : value,
+    }));
+  };
+
+  const handleCreate = async () => {
     if (!acceptedTerms) {
       setShake(true);
-
-      setTimeout(() => {
-        setShake(false);
-      }, 400);
-
+      setTimeout(() => setShake(false), 400);
       return;
     }
 
-    setLoading(true);
+    setError("");
+    setSuccess("");
+
+    if (
+      !formData.name ||
+      !formData.domain ||
+      !formData.taxId ||
+      !formData.contactEmail ||
+      !formData.contactPhone
+    ) {
+      setError("Please fill in all required fields.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+
+      const response = await api.post("/api/organizations", {
+        name: formData.name,
+        type: Number(formData.type),
+        industry: formData.industry,
+        size: Number(formData.size),
+        domain: formData.domain,
+        taxId: formData.taxId,
+        contactEmail: formData.contactEmail,
+        contactPhone: formData.contactPhone,
+        contactWebsite: formData.contactWebsite || null,
+        website: formData.website || null,
+        allowMultipleAddresses: formData.allowMultipleAddresses,
+        requireApprovalForMembers: formData.requireApprovalForMembers,
+        maximumMembers: Number(formData.maximumMembers),
+        enableBilling: formData.enableBilling,
+        enableApiAccess: formData.enableApiAccess,
+        parentOrganizationId: formData.parentOrganizationId,
+      });
+
+      const organizationId = response?.id || response;
+      console.log("Organization created:", organizationId);
+
+      navigate("/check-email", {
+        state: {
+          organizationId,
+          email: formData.contactEmail,
+        },
+      });
+
+      setFormData({
+        name: "",
+        type: 4,
+        industry: "",
+        size: "",
+        domain: "",
+        taxId: "",
+        contactEmail: "",
+        contactPhone: "",
+        contactWebsite: "",
+        website: "",
+        allowMultipleAddresses: false,
+        requireApprovalForMembers: false,
+        maximumMembers: 100,
+        enableBilling: false,
+        enableApiAccess: false,
+        parentOrganizationId: null,
+      });
+
+      setAcceptedTerms(false);
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "Failed to create organization.");
+    } finally {
+      setLoading(false);
+    }
   };
+
+  const navigate = useNavigate();
 
   return (
     <div className={styles.container}>
-      <div className={styles.binaryBg} aria-hidden="true"></div>
+      <div className={styles.binaryBg}></div>
 
-      {/* Header */}
       <header className={styles.header}>
         <div className={styles.logo}>
-          <svg
-            width="39"
-            height="39"
-            viewBox="0 0 39 53"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M29.8865 43.0497L27.0449 45.5729V37.4788C27.0449 37.1731 26.8972 36.8852 26.6475 36.7082L20.4142 32.2555V18.1751L23.1832 16.7919C24.8886 18.5279 28.0486 17.2135 27.9925 14.749C27.8499 10.7675 21.9668 11.1331 22.3451 15.0929L19.0451 16.7435C18.7241 16.904 18.5216 17.2314 18.5216 17.5905V32.7446C18.5216 33.049 18.6693 33.3368 18.919 33.5151L25.1523 37.9666V47.2554L22.3107 49.7785V38.4264C22.3107 37.9042 21.8866 37.48 21.3631 37.48H15.6813V33.4285C17.3333 32.5255 16.6429 29.8674 14.7337 29.903C12.8245 29.8674 12.1342 32.5268 13.7861 33.4285V38.4264C13.7861 38.9498 14.2102 39.374 14.7337 39.374H20.4168V51.4597L19.4692 52.3003L16.6276 49.7772V44.1082C16.6837 43.5719 15.9144 43.051 15.6125 42.7008C15.6507 42.5505 15.6762 42.39 15.6813 42.2142C15.6176 39.7166 11.9559 39.7153 11.8922 42.2142C11.9291 43.6764 13.199 44.2763 14.2586 44.0254L14.7337 44.5004V48.096C14.3593 47.7406 6.34411 40.7088 6.34411 40.5776L11.6158 35.3059C11.7928 35.1288 11.8934 34.8881 11.8934 34.6359V29.4267L15.303 26.8692C15.5412 26.6908 15.6813 26.4106 15.6813 26.1113V24.0442C18.6451 22.987 17.9179 18.5611 14.735 18.5356C11.5521 18.5611 10.8236 22.987 13.7874 24.0442V25.6388L10.3778 28.1963C10.1396 28.3746 9.99951 28.6548 9.99951 28.9541V34.2449L5.12903 39.1154C3.55861 36.9973 2.65304 34.4372 2.39958 31.7957H4.52404L4.71127 32.5446C3.74711 33.7125 4.68071 35.6319 6.21037 35.5835C8.53608 35.5619 8.76916 32.1663 6.48294 31.8224C6.27023 31.1385 6.25877 29.8826 5.26404 29.9005H2.14612L1.76784 27.0589H7.15798C7.68145 27.0589 8.10558 26.6348 8.10558 26.1113V20.0971L16.0672 16.5589C17.1932 16.0367 16.4455 14.3402 15.2967 14.828L6.77333 18.6158C6.43072 18.7687 6.21037 19.1075 6.21037 19.4806V25.1637H1.51566L0.999824 21.2969L2.88484 19.4119C5.64996 20.0232 6.20018 15.8278 3.37011 15.6928C2.14994 15.6737 1.20106 16.8989 1.54622 18.072L0.68523 18.933L0 13.7988H12.8411C13.3645 13.7988 13.7874 13.3747 13.7874 12.8512V8.11577C13.767 6.87268 11.9138 6.87013 11.8934 8.11577V11.9049H2.88866C6.81791 9.90144 10.6121 7.41908 14.3389 4.42979L16.6289 7.48531V12.8512C16.6493 14.0943 18.5025 14.0982 18.5229 12.8512V7.16944C18.5229 6.96438 18.4566 6.76441 18.3331 6.60139L15.8049 3.22746C17.0148 2.20853 18.2184 1.13101 19.4182 0C20.8104 1.55259 22.27 3.00202 23.7984 4.34318L20.6944 7.4471C20.5174 7.62414 20.4168 7.86486 20.4168 8.11577V10.9573C20.4384 12.2017 22.2903 12.2029 22.312 10.9573V8.50806L25.2465 5.57227C26.4387 6.53898 27.6741 7.43309 28.9414 8.2737V17.8516L23.9066 19.5303C23.5207 19.659 23.2596 20.0207 23.2596 20.4283V28.9516C23.2596 29.2917 23.4417 29.6063 23.7372 29.7744L29.889 33.291V43.0485L29.8865 43.0497Z"
-              fill="#3D42DF"
-            />
-          </svg>
-
-          <h3>Trap-intell</h3>
+          <Logo />
         </div>
       </header>
 
@@ -58,45 +169,203 @@ const CreateOrganization = () => {
               </p>
             </div>
 
+            {error && <div className={styles.errorMessage}>{error}</div>}
+
+            {success && <div className={styles.successMessage}>{success}</div>}
+
             <div className={styles.formGrid}>
               <div className={`${styles.formGroup} ${styles.full}`}>
                 <div className={styles.fieldWrap}>
-                  <input type="text" placeholder="Organization Name" />
-                  <label>Organization Name</label>
+                  <input
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="Organization Name"
+                  />
+                  <label>Organization Name *</label>
                 </div>
               </div>
 
               <div className={styles.formGroup}>
                 <div className={styles.fieldWrap}>
-                  <select>
-                    <option>Select Industry</option>
-                    <option>Technology</option>
-                    <option>Finance</option>
-                    <option>Healthcare</option>
+                  <select
+                    name="type"
+                    value={formData.type}
+                    onChange={handleChange}
+                  >
+                    {organizationTypes.map((type) => (
+                      <option key={type.value} value={type.value}>
+                        {type.label}
+                      </option>
+                    ))}
                   </select>
-
-                  <label>Industry</label>
+                  <label>Organization Type</label>
                 </div>
               </div>
 
               <div className={styles.formGroup}>
                 <div className={styles.fieldWrap}>
-                  <select>
-                    <option>Company Size</option>
-                    <option>1–10</option>
-                    <option>11–50</option>
-                    <option>51–200</option>
-                  </select>
+                  <select
+                    name="size"
+                    value={formData.size}
+                    onChange={handleChange}
+                  >
+                    <option value="">Select Company Size</option>
 
+                    {companySizes.map((size) => (
+                      <option key={size.value} value={size.value}>
+                        {size.label}
+                      </option>
+                    ))}
+                  </select>
                   <label>Company Size</label>
                 </div>
               </div>
 
               <div className={`${styles.formGroup} ${styles.full}`}>
                 <div className={styles.fieldWrap}>
-                  <input type="url" placeholder="https://example.com" />
+                  <input
+                    name="industry"
+                    value={formData.industry}
+                    onChange={handleChange}
+                    placeholder="Industry"
+                  />
+                  <label>Industry</label>
+                </div>
+              </div>
+
+              <div className={styles.formGroup}>
+                <div className={styles.fieldWrap}>
+                  <input
+                    name="domain"
+                    value={formData.domain}
+                    onChange={handleChange}
+                    placeholder="company.com"
+                  />
+                  <label>Domain *</label>
+                </div>
+              </div>
+
+              <div className={styles.formGroup}>
+                <div className={styles.fieldWrap}>
+                  <input
+                    name="taxId"
+                    value={formData.taxId}
+                    onChange={handleChange}
+                    placeholder="Tax ID"
+                  />
+                  <label>Tax ID *</label>
+                </div>
+              </div>
+
+              <div className={styles.formGroup}>
+                <div className={styles.fieldWrap}>
+                  <input
+                    type="email"
+                    name="contactEmail"
+                    value={formData.contactEmail}
+                    onChange={handleChange}
+                    placeholder="admin@company.com"
+                  />
+                  <label>Contact Email *</label>
+                </div>
+              </div>
+
+              <div className={styles.formGroup}>
+                <div className={styles.fieldWrap}>
+                  <input
+                    name="contactPhone"
+                    value={formData.contactPhone}
+                    onChange={handleChange}
+                    placeholder="+20 100 000 0000"
+                  />
+                  <label>Contact Phone *</label>
+                </div>
+              </div>
+
+              <div className={`${styles.formGroup} ${styles.full}`}>
+                <div className={styles.fieldWrap}>
+                  <input
+                    name="contactWebsite"
+                    value={formData.contactWebsite}
+                    onChange={handleChange}
+                    placeholder="https://contact.company.com"
+                  />
+                  <label>Contact Website</label>
+                </div>
+              </div>
+
+              <div className={`${styles.formGroup} ${styles.full}`}>
+                <div className={styles.fieldWrap}>
+                  <input
+                    name="website"
+                    value={formData.website}
+                    onChange={handleChange}
+                    placeholder="https://company.com"
+                  />
                   <label>Website</label>
                 </div>
+              </div>
+
+              <div className={`${styles.formGroup} ${styles.full}`}>
+                <div className={styles.fieldWrap}>
+                  <input
+                    type="number"
+                    min={1}
+                    name="maximumMembers"
+                    value={formData.maximumMembers}
+                    onChange={handleChange}
+                  />
+                  <label>Maximum Members</label>
+                </div>
+              </div>
+
+              <div className={`${styles.formGroup} ${styles.full}`}>
+                <label className={styles.checkboxRow}>
+                  <input
+                    type="checkbox"
+                    name="allowMultipleAddresses"
+                    checked={formData.allowMultipleAddresses}
+                    onChange={handleChange}
+                  />
+                  <span className={styles.checkboxLabel}>
+                    Allow Multiple Addresses
+                  </span>
+                </label>
+
+                <label className={styles.checkboxRow}>
+                  <input
+                    type="checkbox"
+                    name="requireApprovalForMembers"
+                    checked={formData.requireApprovalForMembers}
+                    onChange={handleChange}
+                  />
+                  <span className={styles.checkboxLabel}>
+                    Require Approval For Members
+                  </span>
+                </label>
+
+                <label className={styles.checkboxRow}>
+                  <input
+                    type="checkbox"
+                    name="enableBilling"
+                    checked={formData.enableBilling}
+                    onChange={handleChange}
+                  />
+                  <span className={styles.checkboxLabel}>Enable Billing</span>
+                </label>
+
+                <label className={styles.checkboxRow}>
+                  <input
+                    type="checkbox"
+                    name="enableApiAccess"
+                    checked={formData.enableApiAccess}
+                    onChange={handleChange}
+                  />
+                  <span className={styles.checkboxLabel}>
+                    Enable API Access
+                  </span>
+                </label>
               </div>
 
               <div className={`${styles.formGroup} ${styles.full}`}>
@@ -130,10 +399,10 @@ const CreateOrganization = () => {
                   <button
                     type="button"
                     className={styles.btnCreate}
-                    onClick={handleCreate}
                     disabled={loading}
+                    onClick={handleCreate}
                   >
-                    {loading ? "Creating..." : "Create account"}
+                    {loading ? "Creating..." : "Create Organization"}
                   </button>
                 </div>
               </div>

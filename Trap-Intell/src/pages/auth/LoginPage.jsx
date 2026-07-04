@@ -7,12 +7,8 @@ import { useAuth } from "../../context/AuthContext";
 import "../../assets/styles/utilities.css";
 import "../../assets/styles/normalize.css";
 
-// Backend returns RFC 7807: { detail: "...", title: "...", status: 4xx }
-// api.js already extracts errorData.detail → error.message
-// So error.message IS the human-readable string from the backend.
 function parseApiError(error) {
   const msg = error?.message || "";
-  // Map known backend messages to friendlier UI text if needed
   if (msg.includes("Invalid email or password"))
     return "Invalid email or password.";
   if (msg.includes("suspended"))
@@ -31,6 +27,7 @@ function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [showSignupChoice, setShowSignupChoice] = useState(false);
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -40,17 +37,11 @@ function LoginPage() {
       setError("Please enter your email and password.");
       return;
     }
-
     setError("");
     setLoading(true);
-
     try {
       const result = await login(email, password, rememberMe);
-
-      // Confirmed response: { accessToken, user: { role, emailConfirmed, ... } }
-      // No "organization" object, no "status" field
       const user = result?.user;
-
       if (!user?.emailConfirmed) {
         navigate("/check-email");
         return;
@@ -59,7 +50,6 @@ function LoginPage() {
         navigate("/admin");
         return;
       }
-
       navigate("/dashboard");
     } catch (err) {
       setError(parseApiError(err));
@@ -75,7 +65,6 @@ function LoginPage() {
   return (
     <>
       <div className={styles.binaryBg} aria-hidden="true" />
-
       <header className={styles.header}>
         <Logo />
       </header>
@@ -93,7 +82,7 @@ function LoginPage() {
               </div>
 
               <div className={styles.formFlex}>
-                {/* API error banner */}
+                {/* Error banner */}
                 {error && (
                   <div className={styles.errorBanner} role="alert">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
@@ -206,9 +195,25 @@ function LoginPage() {
                   </button>
                 </div>
 
-                {/* Sign up link */}
+                {/* Sign up — triggers choice modal */}
                 <p className={styles.loginRow}>
-                  Don't have an account? <Link to="/signup">Sign up</Link>
+                  Don't have an account?{" "}
+                  <button
+                    type="button"
+                    onClick={() => setShowSignupChoice(true)}
+                    style={{
+                      background: "none",
+                      border: "none",
+                      padding: 0,
+                      color: "#4044e4",
+                      fontWeight: 700,
+                      cursor: "pointer",
+                      fontFamily: "inherit",
+                      fontSize: "inherit",
+                    }}
+                  >
+                    Sign up
+                  </button>
                 </p>
 
                 {/* Divider */}
@@ -216,7 +221,7 @@ function LoginPage() {
                   <span>or login with</span>
                 </div>
 
-                {/* Social login (UI only) */}
+                {/* Social buttons */}
                 <div className={styles.socialOptions}>
                   <button
                     type="button"
@@ -279,6 +284,290 @@ function LoginPage() {
           </div>
         </div>
       </main>
+
+      {/* ── Sign up choice modal ── */}
+      {showSignupChoice && (
+        <div
+          onClick={() => setShowSignupChoice(false)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            background: "rgba(17,19,38,0.5)",
+            backdropFilter: "blur(4px)",
+            zIndex: 300,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 24,
+            animation: "fadeIn 0.15s ease",
+          }}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              background: "#fff",
+              borderRadius: 24,
+              padding: "40px 36px",
+              width: "100%",
+              maxWidth: 480,
+              boxShadow:
+                "0 4px 16px rgba(0,0,0,0.08),0 24px 64px rgba(0,0,0,0.18)",
+              animation: "riseUp 0.22s cubic-bezier(0.22,1,0.36,1)",
+            }}
+          >
+            {/* Header */}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "flex-start",
+                marginBottom: 28,
+              }}
+            >
+              <div>
+                <h2
+                  style={{
+                    margin: "0 0 6px",
+                    fontSize: "1.3rem",
+                    fontWeight: 800,
+                    color: "#111326",
+                    letterSpacing: "-0.3px",
+                  }}
+                >
+                  Get Started
+                </h2>
+                <p style={{ margin: 0, fontSize: "0.87rem", color: "#9098b1" }}>
+                  Choose how you'd like to join Trap-Intel.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowSignupChoice(false)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer",
+                  color: "#9098b1",
+                  fontSize: "1.1rem",
+                  padding: "4px",
+                  borderRadius: 8,
+                  lineHeight: 1,
+                }}
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Option 1 — Join with invitation */}
+            <button
+              onClick={() => {
+                setShowSignupChoice(false);
+                navigate("/signup");
+              }}
+              style={{
+                width: "100%",
+                padding: "20px 22px",
+                background: "#fff",
+                border: "1.5px solid #e8eaf0",
+                borderRadius: 16,
+                cursor: "pointer",
+                textAlign: "left",
+                marginBottom: 12,
+                transition: "border-color 0.15s, box-shadow 0.15s",
+                fontFamily: "inherit",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "#4044e4";
+                e.currentTarget.style.boxShadow =
+                  "0 4px 20px rgba(64,68,228,0.1)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "#e8eaf0";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                <div
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 12,
+                    flexShrink: 0,
+                    background: "rgba(64,68,228,0.08)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#4044e4"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                    <circle cx="12" cy="7" r="4" />
+                  </svg>
+                </div>
+                <div>
+                  <div
+                    style={{
+                      fontSize: "0.95rem",
+                      fontWeight: 700,
+                      color: "#111326",
+                      marginBottom: 3,
+                    }}
+                  >
+                    Join with Invitation
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "0.8rem",
+                      color: "#9098b1",
+                      fontWeight: 500,
+                    }}
+                  >
+                    You have an invitation token from your organization admin
+                  </div>
+                </div>
+                <svg
+                  style={{ marginLeft: "auto", flexShrink: 0 }}
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#c8cce0"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="9,18 15,12 9,6" />
+                </svg>
+              </div>
+            </button>
+
+            {/* Option 2 — Create new organization */}
+            <button
+              onClick={() => {
+                setShowSignupChoice(false);
+                navigate("/create-org");
+              }}
+              style={{
+                width: "100%",
+                padding: "20px 22px",
+                background: "#fff",
+                border: "1.5px solid #e8eaf0",
+                borderRadius: 16,
+                cursor: "pointer",
+                textAlign: "left",
+                transition: "border-color 0.15s, box-shadow 0.15s",
+                fontFamily: "inherit",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = "#4044e4";
+                e.currentTarget.style.boxShadow =
+                  "0 4px 20px rgba(64,68,228,0.1)";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = "#e8eaf0";
+                e.currentTarget.style.boxShadow = "none";
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+                <div
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: 12,
+                    flexShrink: 0,
+                    background: "rgba(138,27,250,0.08)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <svg
+                    width="20"
+                    height="20"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#8a1bfa"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    <polyline points="9,22 9,12 15,12 15,22" />
+                  </svg>
+                </div>
+                <div>
+                  <div
+                    style={{
+                      fontSize: "0.95rem",
+                      fontWeight: 700,
+                      color: "#111326",
+                      marginBottom: 3,
+                    }}
+                  >
+                    Create New Organization
+                  </div>
+                  <div
+                    style={{
+                      fontSize: "0.8rem",
+                      color: "#9098b1",
+                      fontWeight: 500,
+                    }}
+                  >
+                    Set up a new organization and become the admin
+                  </div>
+                </div>
+                <svg
+                  style={{ marginLeft: "auto", flexShrink: 0 }}
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#c8cce0"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="9,18 15,12 9,6" />
+                </svg>
+              </div>
+            </button>
+
+            <p
+              style={{
+                margin: "20px 0 0",
+                textAlign: "center",
+                fontSize: "0.78rem",
+                color: "#c8cce0",
+              }}
+            >
+              Already have an account?{" "}
+              <button
+                onClick={() => setShowSignupChoice(false)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  color: "#4044e4",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  fontSize: "inherit",
+                  padding: 0,
+                }}
+              >
+                Log in
+              </button>
+            </p>
+          </div>
+        </div>
+      )}
     </>
   );
 }

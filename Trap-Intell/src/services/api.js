@@ -56,6 +56,8 @@ const NO_REFRESH_ENDPOINTS = [
   "/api/auth/refresh",
   "/api/auth/forgot-password",
   "/api/auth/reset-password",
+  "/api/auth/verify-email",
+  "/api/organizations",
   "/api/plans",
 ];
 

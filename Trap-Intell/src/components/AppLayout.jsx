@@ -3,9 +3,12 @@ import { Outlet } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import styles from "./AppLayout.module.css";
+import { useAuth } from "../context/AuthContext";
+import ChatBot from "./Chatbot";
 
 export default function AppLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { subscriptionActive } = useAuth();
 
   return (
     <div className={styles.shell}>
@@ -22,6 +25,7 @@ export default function AppLayout() {
           <Outlet />
         </main>
       </div>
+      <ChatBot />
     </div>
   );
 }

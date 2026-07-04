@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import "leaflet/dist/leaflet.css";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../services/api";
+import { ComingSoon } from "../App";
 import styles from "./Dashboard.module.css";
 
 // ── Helpers ────────────────────────────────────────────────────
@@ -191,6 +192,7 @@ export default function Dashboard() {
   const { orgId } = useAuth();
   const navigate = useNavigate();
   const [range, setRange] = useState("24h");
+  const { subscriptionActive } = useAuth();
 
   // Dashboard data state
   const [alertsDash, setAlertsDash] = useState(null); // alerts/dashboard
@@ -198,7 +200,11 @@ export default function Dashboard() {
   const [recentAlerts, setRecentAlerts] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ── Current endpoints ────────────────────────────────────────
+  if (!subscriptionActive) {
+    return <ComingSoon page="Dashboard" />;
+  }
+
+  // ── Confirmed endpoints ────────────────────────────────────────
   // GET /api/organizations/{orgId}/alerts/dashboard   → SOC overview metrics
   // GET /api/organizations/{orgId}/dashboard/owner    → owner-focused metrics
   // GET /api/organizations/{orgId}/alerts             → recent alert list
@@ -255,14 +261,14 @@ export default function Dashboard() {
     },
     {
       label: "Total Attacks (24h)",
-      // Not available in dashboard/owner yet — show audit events
+      // Not available in dashboard/owner yet — show audit events as proxy
       value: loading ? null : fmt(ownerDash?.auditing?.totalEvents ?? "—"),
       sub: ownerDash?.auditing?.totalEvents != null ? "audit events" : null,
       color: "green",
     },
     {
       label: "Active Honeypots",
-      // 0/0 until honeypots are seeded
+      // From quota — shows 0/0 until honeypots are seeded
       value: loading
         ? null
         : ownerDash?.quota != null

@@ -13,6 +13,43 @@ export function AuthProvider({ children }) {
     }
   });
 
+  const [subscriptionActive, setSubscriptionActive] = useState(
+    localStorage.getItem("subscription_active") === "true",
+  );
+  const checkSubscription = useCallback(async () => {
+    const organizationId =
+      localStorage.getItem("org_id") || user?.organizationId;
+
+    if (!organizationId) {
+      setSubscriptionActive(false);
+      return false;
+    }
+
+    try {
+      const subscription = await api.get(
+        `/api/organizations/${organizationId}/subscriptions/current`,
+      );
+
+      const active =
+        subscription &&
+        subscription.status !== "Cancelled" &&
+        subscription.status !== "Suspended";
+
+      setSubscriptionActive(active);
+      localStorage.setItem("subscription_active", active);
+
+      return active;
+    } catch (err) {
+      if (err.status === 404) {
+        setSubscriptionActive(false);
+        localStorage.setItem("subscription_active", false);
+        return false;
+      }
+
+      throw err;
+    }
+  }, [user]);
+
   const [orgId, setOrgId] = useState(
     () => localStorage.getItem("org_id") || null,
   );
@@ -51,6 +88,8 @@ export function AuthProvider({ children }) {
 
     setUser(userData);
     setOrgId(userData.organizationId ?? null);
+
+    await checkSubscription();
 
     return data;
   }, []);
@@ -94,6 +133,8 @@ export function AuthProvider({ children }) {
     user,
     orgId,
     isAuthenticated,
+    subscriptionActive,
+    checkSubscription,
     login,
     logout,
     hasRole,

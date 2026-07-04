@@ -145,3 +145,9 @@
     transform: translateY(0);
   }
 }
+
+.redirectText {
+  margin-top: 1rem;
+  color: #7b7b7b;
+  font-size: 0.95rem;
+}
