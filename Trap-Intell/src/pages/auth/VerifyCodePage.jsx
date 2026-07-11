@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import Logo from "../../components/Logo";
-import verifyImage from "../../assets/Images/passwordf.png";
+import verifyImage from "../../assets/images/passwordf.png";
 import styles from "./VerifyCodePage.module.css";
 
 function VerifyCodePage() {

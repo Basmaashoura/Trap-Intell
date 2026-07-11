@@ -32,7 +32,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url("../Images/signup-bckg.png");
+  background-image: url("../images/signup-bckg.png");
   background-size: cover;
   background-position: center;
   opacity: 0.18;

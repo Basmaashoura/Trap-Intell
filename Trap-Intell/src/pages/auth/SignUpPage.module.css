@@ -7,7 +7,7 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background-image: url("../Images/binary.png");
+  background-image: url("../images/binary.png");
   background-size: cover;
   background-position: bottom;
   opacity: 0.5;

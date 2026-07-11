@@ -10,7 +10,7 @@
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background-image: url("../Images/signup-bckg.png");
+  background-image: url("../images/signup-bckg.png");
   background-size: cover;
   background-position: center;
   opacity: 0.5;
