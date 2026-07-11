@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Logo from "../../components/Logo";
-import forgotImage from "../../assets/Images/passwordf.png";
+import forgotImage from "../../assets/images/passwordf.png";
 import styles from "./ForgotPasswordPage.module.css";
 import api from "../../services/api";
 
