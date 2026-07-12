@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { api } from "../services/api";
 import styles from "./HoneypotsPage.module.css";
@@ -37,6 +37,24 @@ const STATIC_HONEYPOTS = [
   },
 ];
 
+// Type enum mapping
+const TYPE_MAP = {
+  SSH: 0,
+  HTTP: 1,
+  FTP: 2,
+  RDP: 3,
+  MySQL: 4,
+  Samba: 5,
+};
+
+// Location enum mapping
+const LOCATION_MAP = {
+  DMZ: 0,
+  Internal: 1,
+  Cloud: 2,
+  Public: 3,
+};
+
 export default function HoneypotsPage() {
   const { orgId } = useAuth();
   const [honeypots, setHoneypots] = useState(STATIC_HONEYPOTS);
@@ -45,7 +63,16 @@ export default function HoneypotsPage() {
   const [showLogs, setShowLogs] = useState(false);
   const [selectedHoneypot, setSelectedHoneypot] = useState(null);
   const [actionLoading, setActionLoading] = useState({});
-  const [form, setForm] = useState({ name: "", type: "" });
+  const [form, setForm] = useState({ name: "", type: "SSH", location: "DMZ" });
+  const [sub, setSub] = useState(null);
+
+  useEffect(() => {
+    if (!orgId) return;
+    api
+      .get(`/api/organizations/${orgId}/subscriptions/current`)
+      .then((data) => setSub(data))
+      .catch(() => {});
+  }, [orgId]);
 
   // ── Search filter ──────────────────────────────────────────
   const filtered = honeypots.filter(
@@ -119,17 +146,20 @@ export default function HoneypotsPage() {
 
   // ── Deploy (POST — endpoint exists) ───────────────────────
   const deploy = useCallback(async () => {
-    if (!form.name.trim() || !form.type.trim()) {
+    if (!form.name.trim() || !form.type) {
       alert("Please fill all fields");
       return;
     }
     if (!orgId) return;
     try {
       await api.post(`/api/organizations/${orgId}/honeypots`, {
-        name: form.name,
-        type: form.type,
+        subscriptionId: sub?.id ?? null, // ← need current subscription id
+        name: form.name.trim(),
+        type: TYPE_MAP[form.type] ?? 0,
+        location: LOCATION_MAP[form.location] ?? 0,
+        configTemplateBase64: null,
       });
-      // Add optimistically — replace with real GET when available
+      // optimistic add
       setHoneypots((prev) => [
         {
           id: crypto.randomUUID(),
@@ -143,12 +173,12 @@ export default function HoneypotsPage() {
         },
         ...prev,
       ]);
-      setForm({ name: "", type: "" });
+      setForm({ name: "", type: "SSH", location: "DMZ" });
       setShowDeploy(false);
     } catch (err) {
       alert(`Deploy failed: ${err.message}`);
     }
-  }, [orgId, form]);
+  }, [orgId, form, sub]);
 
   // ── Logs modal ─────────────────────────────────────────────
   const openLogs = (hp) => {
@@ -324,34 +354,122 @@ export default function HoneypotsPage() {
 
       {/* Deploy Modal */}
       {showDeploy && (
-        <div className="modal-overlay" onClick={() => setShowDeploy(false)}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-            <h3>Deploy New Honeypot</h3>
-            <input
-              placeholder="Honeypot Name"
-              value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-            />
-            <input
-              placeholder="Type (SSH, HTTP, FTP...)"
-              value={form.type}
-              onChange={(e) => setForm({ ...form, type: e.target.value })}
-            />
-            <button onClick={deploy}>Deploy</button>
-            <button onClick={() => setShowDeploy(false)}>Cancel</button>
+        <div
+          className={styles.modalOverlay}
+          onClick={() => setShowDeploy(false)}
+        >
+          <div
+            className={styles.modalCard}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>Deploy New Honeypot</h2>
+              <button
+                className={styles.modalClose}
+                onClick={() => setShowDeploy(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className={styles.modalBody}>
+              <div className={styles.fieldWrap}>
+                <label className={styles.fieldLabel}>Honeypot Name</label>
+                <input
+                  className={styles.fieldInput}
+                  placeholder="e.g., SSH-Honeypot-DMZ-02"
+                  value={form.name}
+                  onChange={(e) => setForm({ ...form, name: e.target.value })}
+                />
+              </div>
+
+              <div className={styles.fieldWrap}>
+                <label className={styles.fieldLabel}>Type</label>
+                <select
+                  className={styles.fieldSelect}
+                  value={form.type}
+                  onChange={(e) => setForm({ ...form, type: e.target.value })}
+                >
+                  {Object.keys(TYPE_MAP).map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className={styles.fieldWrap}>
+                <label className={styles.fieldLabel}>Location</label>
+                <select
+                  className={styles.fieldSelect}
+                  value={form.location}
+                  onChange={(e) =>
+                    setForm({ ...form, location: e.target.value })
+                  }
+                >
+                  {Object.keys(LOCATION_MAP).map((l) => (
+                    <option key={l} value={l}>
+                      {l}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className={styles.modalFooter}>
+              <button
+                className={styles.btnCancel}
+                onClick={() => setShowDeploy(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className={styles.btnDeploySubmit}
+                onClick={deploy}
+                disabled={!form.name.trim()}
+              >
+                Deploy Honeypot
+              </button>
+            </div>
           </div>
         </div>
       )}
 
       {/* Logs Modal */}
       {showLogs && selectedHoneypot && (
-        <div className="modal-overlay" onClick={() => setShowLogs(false)}>
-          <div className="modal-card" onClick={(e) => e.stopPropagation()}>
-            <h3>System Logs — {selectedHoneypot.name}</h3>
-            {logs.map((log, i) => (
-              <p key={i}>{log}</p>
-            ))}
-            <button onClick={() => setShowLogs(false)}>Close</button>
+        <div className={styles.modalOverlay} onClick={() => setShowLogs(false)}>
+          <div
+            className={styles.modalCard}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>
+                System Logs — {selectedHoneypot.name}
+              </h2>
+              <button
+                className={styles.modalClose}
+                onClick={() => setShowLogs(false)}
+              >
+                ✕
+              </button>
+            </div>
+            <div className={styles.logsBody}>
+              {logs.map((log, i) => (
+                <div key={i} className={styles.logLine}>
+                  <span className={styles.logTime}>
+                    {String(i).padStart(2, "0")}
+                  </span>
+                  <span className={styles.logMsg}>{log}</span>
+                </div>
+              ))}
+            </div>
+            <div className={styles.modalFooter}>
+              <button
+                className={styles.btnCancel}
+                style={{ flex: 1 }}
+                onClick={() => setShowLogs(false)}
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
